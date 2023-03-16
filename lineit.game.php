@@ -17,13 +17,24 @@
   */
 
 
-require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
+require_once(APP_GAMEMODULE_PATH.'module/table/table.game.php');
 
+require_once('modules/php/objects/card.php');
+require_once('modules/php/constants.inc.php');
+require_once('modules/php/utils.php');
+require_once('modules/php/actions.php');
+require_once('modules/php/states.php');
+require_once('modules/php/args.php');
+require_once('modules/php/debug-util.php');
 
-class LineIt extends Table
-{
-	function __construct( )
-	{
+class LineIt extends Table {
+    use UtilTrait;
+    use ActionTrait;
+    use StateTrait;
+    use ArgsTrait;
+    use DebugUtilTrait;
+
+	function __construct() {
         // Your global variables labels:
         //  Here, you can assign labels to global variables you are using for this game.
         //  You can use any number of global variables with IDs between 10 and 99.
@@ -32,18 +43,21 @@ class LineIt extends Table
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
         
-        self::initGameStateLabels( array( 
-            //    "my_first_global_variable" => 10,
+        self::initGameStateLabels([
+            FIRST_PLAYER => FIRST_PLAYER,
             //    "my_second_global_variable" => 11,
             //      ...
             //    "my_first_game_variant" => 100,
             //    "my_second_game_variant" => 101,
             //      ...
-        ) );        
+        ]);   
+		
+        $this->cards = $this->getNew("module.common.deck");
+        $this->cards->init("card");
+        $this->cards->autoreshuffle = false;     
 	}
 	
-    protected function getGameName( )
-    {
+    protected function getGameName() {
 		// Used for translations and stuff. Please do not modify.
         return "lineit";
     }	
@@ -55,8 +69,7 @@ class LineIt extends Table
         In this method, you must setup the game according to the game rules, so that
         the game is ready to be played.
     */
-    protected function setupNewGame( $players, $options = array() )
-    {    
+    protected function setupNewGame( $players, $options = []) {    
         // Set the colors of the players with HTML color code
         // The default below is red/green/blue/orange/brown
         // The number of colors defined here must correspond to the maximum number of players allowed for the gams
@@ -66,13 +79,16 @@ class LineIt extends Table
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
-        $values = array();
-        foreach( $players as $player_id => $player )
-        {
+        $values = [];
+        $firstPlayer = null;
+        foreach( $players as $player_id => $player ) {
+            if ($firstPlayer === null) {
+                $firstPlayer = $player_id;
+            }
             $color = array_shift( $default_colors );
             $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."')";
         }
-        $sql .= implode( $values, ',' );
+        $sql .= implode(',', $values);
         self::DbQuery( $sql );
         self::reattributeColorsBasedOnPreferences( $players, $gameinfos['player_colors'] );
         self::reloadPlayersBasicInfos();
@@ -80,14 +96,15 @@ class LineIt extends Table
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
+        $this->setGameStateInitialValue(FIRST_PLAYER, $firstPlayer);
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
         //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
-        // TODO: setup the initial game situation here
+        // setup the initial game situation here
+        $this->setupCards();
        
 
         // Activate first player (which is in general a good idea :) )
@@ -105,18 +122,31 @@ class LineIt extends Table
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas()
-    {
-        $result = array();
+    protected function getAllDatas() {
+        $result = [];
     
-        $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
+        $currentPlayerId = intval(self::getCurrentPlayerId());    // !! We must only return informations visible by this player !!
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_no playerNo FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
   
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
+        // Gather all information about current game situation (visible by player $current_player_id).
+        
+        foreach($result['players'] as $playerId => &$player) {
+            $player['playerNo'] = intval($player['playerNo']);
+            
+            $hand = $this->getCardsByLocation('hand', $playerId);
+            $player['hand'] = $currentPlayerId == $playerId ? $hand : Card::onlyIds($hand);
+        }
+
+        $result['market'] = $this->getCardsByLocation('market');
+        $jackpots = [];
+        for ($i = 1; $i <= 4; $i++) {
+            $jackpots[$i] = Card::onlyIds($this->getCardsByLocation('jackpot', $i));
+        }
+        $result['jackpots'] = $jackpots;
   
         return $result;
     }
