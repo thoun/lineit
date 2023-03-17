@@ -15,6 +15,8 @@ interface LineItPlayer extends Player {
     playerNo: number;
     hand: Card[];
     line: Card[];
+    betTokens: { [value: number]: number };
+    scored: number;
 }
 
 interface LineItGamedatas {
@@ -52,6 +54,7 @@ interface EnteringChooseMarketCardArgs {
     canPlaceOnLine: Card[];
     canAddToLine: boolean;
     canAddToHand: boolean;
+    canClose: boolean;
 }
 
 interface EnteringPlayCardArgs {
@@ -90,6 +93,7 @@ interface NotifNewFirstPlayerArgs {
 interface NotifPlayCardArgs {
     playerId: number;
     card: Card;
+    fromHand: boolean;
 } 
 
 // applyJackpot
@@ -110,4 +114,5 @@ interface NotifApplyJackpotArgs {
     playerId: number;
     count: number | string;
     removed: number | string;
+    color: number;
 }

@@ -15,7 +15,7 @@ class LineItPlayer {
         $this->color = $dbPlayer['player_color'];
         $this->no = intval($dbPlayer['player_no']);
         $this->score = intval($dbPlayer['player_score']);
-        $this->tokens = json_decode($dbPlayer['player_tokens'] ?? '[]', true);
+        $this->tokens = json_decode($dbPlayer['player_tokens'], true);
         $this->playedHand = boolval($dbPlayer['player_played_hand']);
     }
 }

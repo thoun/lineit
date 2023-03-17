@@ -17,14 +17,17 @@ trait ActionTrait {
         $playerId = intval($this->getActivePlayerId());
 
         if ($this->getPlayer($playerId)->playedHand) {
-            throw new BgaUserException("You already played a card from hand on this round");
+            throw new BgaUserException("You already played a card from your hand on this round");
         }
 
         $this->playCard($playerId, $id);
 
-        self::DbQuery("update player set player_played_hand = 1 where player_id = $playerId");
+        $stateName = $this->gamestate->state()['name'];
+        if($stateName != 'playHandCard') {
+            self::DbQuery("update player set player_played_hand = 1 where player_id = $playerId");
+        }
 
-        $this->gamestate->nextState('stay');
+        $this->gamestate->nextState($stateName == 'playHandCard' ? 'next' : 'stay');
     }
 
     public function chooseMarketCardLine(int $id) {
@@ -73,11 +76,16 @@ trait ActionTrait {
 
         $this->applyCloseLine($playerId);
 
-        $this->gamestate->nextState('next');
+        $this->gamestate->nextState('stay');
     }
   	
     public function pass() {
-        $this->checkAction('pass'); 
+        $this->checkAction('pass');         
+
+        if($this->gamestate->state()['name'] == 'playHandCard') {
+            $playerId = intval($this->getActivePlayerId());
+            self::DbQuery("update player set player_played_hand = 1 where player_id = $playerId");
+        }
 
         $this->gamestate->nextState('next');
     }

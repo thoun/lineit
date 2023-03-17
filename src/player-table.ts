@@ -40,4 +40,14 @@ class PlayerTable {
         
         this.line.addCards(player.line);
     }
+
+    public setSelectable(selectable: boolean, selectableCards: Card[] | null = null) {
+        this.hand.setSelectionMode(selectable ? 'single' : 'none');
+        this.hand.getCards().forEach(card => {
+            const element = this.hand.getCardElement(card);
+            const disabled = selectable && selectableCards != null && !selectableCards.some(s => s.id == card.id);
+            element.classList.toggle('disabled', disabled);
+            element.classList.toggle('selectable', selectable && !disabled);
+        });
+    }
 }

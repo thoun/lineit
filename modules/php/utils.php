@@ -110,10 +110,11 @@ trait UtilTrait {
 
     // return list of cards that can be placed on the player's line
     function canPlaceOnLine(int $playerId, array $market = []) {
-        $hand = $this->getCardsByLocation('hand', $playerId);
+        $hand = $this->getPlayer($playerId)->playedHand ? [] : $this->getCardsByLocation('hand', $playerId);
 
         $cards = array_merge($hand, $market);
         $line = $this->getCardsByLocation('line'.$playerId);
+        $hasBetCard = count(array_filter($line, fn($card) => $card->type == 2)) > 0;
         $lineWithoutBet = array_values(array_filter($line, fn($card) => $card->type == 1));
 
         if (count($lineWithoutBet) < 2) {
@@ -123,6 +124,10 @@ trait UtilTrait {
         $direction = $lineWithoutBet[1]->number - $lineWithoutBet[0]->number;
 
         $lineLastNumber = $lineWithoutBet[count($lineWithoutBet) - 1]->number;
+
+        if ($hasBetCard) {
+            $cards = array_values(array_filter($cards, fn($card) => $card->type != 2));
+        }
 
         if ($direction > 0) {
             return array_values(array_filter($cards, fn($card) => $card->type != 1 || $card->number > $lineLastNumber));
@@ -160,6 +165,7 @@ trait UtilTrait {
             'card' => $card,
             'cardValue' => '',
             'preserve' => ['card', 'cardValue'],
+            'fromHand' => $card->location == 'hand',
         ]);
 
         if ($card->type == 1) {
@@ -178,9 +184,10 @@ trait UtilTrait {
     function applyJackpot(int $playerId, int $color) {
         $jackpotCardsCount = intval($this->cards->countCardInLocation('jackpot', $color));
         if ($jackpotCardsCount > 0) {
-            $this->cards->moveAllCardsInLocation('jackpot', 'scored', $color, $playerId);
+            $this->cards->moveAllCardsInLocation('jackpot', 'scored', $color, $playerId);            
+            self::DbQuery("update player set player_score = player_score + $jackpotCardsCount where `player_id` = $playerId");
         }
-        self::notifyAllPlayers('applyJackpot', clienttranslate('${player_name} adds ${count} card(s) from the jackpot pile to scored cards'), [
+        self::notifyAllPlayers($jackpotCardsCount > 0 ? 'applyJackpot' : 0, clienttranslate('${player_name} adds ${count} card(s) from the jackpot pile to scored cards'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'count' => $jackpotCardsCount,
@@ -189,21 +196,23 @@ trait UtilTrait {
     }
 
     function applyCloseLine(int $playerId) {
-
-        self::notifyAllPlayers('log', clienttranslate('${player_name} closes his line'), []);
+        self::notifyAllPlayers('log', clienttranslate('${player_name} closes his line'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+        ]);
 
         $line = $this->getCardsByLocation('line'.$playerId);
         $lineWithoutBet = array_values(array_filter($line, fn($card) => $card->type == 1));
         $betCard = $this->array_find($line, fn($card) => $card->type == 2);
 
         if ($betCard != null)  {
-            $cardsAfterBetCard = $this->array_find($lineWithoutBet, fn($card) => $card->locationArg > $betCard->locationArg);
+            $cardsAfterBetCard = array_values(array_filter($lineWithoutBet, fn($card) => $card->locationArg > $betCard->locationArg));
             $betWon = count($cardsAfterBetCard) >= $betCard->number;
             $tokenNumber = $betWon ? $betCard->number : -$betCard->number;
 
             $tokens = $this->getPlayer($playerId)->tokens;
             $tokens[$tokenNumber]++;
-            $this->DbQuery("UPDATE player SET `player_tokens` = '".json_encode($tokens)."' WHERE player_id = $playerId");
+            $this->DbQuery("UPDATE player SET `player_tokens` = '".json_encode($tokens)."', player_score = player_score + $tokenNumber WHERE player_id = $playerId");
 
             self::notifyAllPlayers('betResult', $betWon ? clienttranslate('${player_name} won the ${cardValue} bet') : clienttranslate('${player_name} lost the ${cardValue} bet'), [
                 'playerId' => $playerId,
@@ -224,6 +233,7 @@ trait UtilTrait {
 
         if (count($scoredCards) > 0) {
             $this->cards->moveCards(array_map(fn($card) => $card->id, $scoredCards), 'scored', $playerId);
+            self::DbQuery("update player set player_score = player_score + ".count($scoredCards)." where `player_id` = $playerId");
         }
 
         self::notifyAllPlayers('closeLine', clienttranslate('${player_name} adds ${count} card(s) from the line to scored cards (${removed} removed cards)'), [

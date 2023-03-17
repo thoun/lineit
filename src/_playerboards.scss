@@ -15,6 +15,10 @@
   align-items: center;
   margin: 5px 0;
 
+  >div {
+    flex: 1;
+  }
+
   .icon {
     margin-right: 5px;
   }
@@ -27,7 +31,19 @@
   background-image: url('img/cards.svg');
   background-size: contain;
   background-repeat: no-repeat;
-  vertical-align: bottom;
+  background-position: center;
+  vertical-align: middle;
+}
+
+.player-scored-card {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  background-image: url('img/card-deck.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  vertical-align: middle;
 }
 
 .first-player-token-wrapper {
@@ -42,4 +58,31 @@
   height: 64px;
   border-radius: 50%;
   box-shadow: 1px 1px 3px 1px black;
+}
+
+.bet-tokens {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 12px;
+  margin: 8px 0;
+
+  .bet-token {
+    background-image: url('img/bet-tokens.png');
+    background-repeat: no-repeat;
+    background-size: auto 200%;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    box-shadow: 1px 1px 3px 1px black;
+    margin-left: -12px;
+
+    @for $number from 3 through 5 {
+      &[data-value="#{$number}"] {
+          background-position: #{($number - 3) * 50%} 0%;
+      }
+      &[data-value="-#{$number}"] {
+          background-position: #{($number - 3) * 50%} 100%;
+      }
+    }
+  }
 }

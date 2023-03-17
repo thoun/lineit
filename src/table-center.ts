@@ -2,6 +2,7 @@ class TableCenter {
     public market: LineStock<Card>;
 
     private deckCounter: Counter;
+    private jackpotStocks: VoidStock<Card>[] = [];
     private jackpotCounters: Counter[] = [];
 
     constructor(private game: LineItGame, gamedatas: LineItGamedatas) {
@@ -14,7 +15,7 @@ class TableCenter {
 
         for (let i=1; i<=4; i++) {
             html += `
-            <div id="jackpot${i}" class="deck" data-count="${gamedatas.jackpots[i].length}">
+            <div id="jackpot${i}" class="card-deck" data-count="${gamedatas.jackpots[i].length}">
                 <div class="jackpot-token" data-color="${i}"></div>
                 <span id="jackpot${i}-counter" class="deck-counter"></span>
             </div>
@@ -27,6 +28,8 @@ class TableCenter {
             this.jackpotCounters[i] = new ebg.counter();
             this.jackpotCounters[i].create(`jackpot${i}-counter`);
             this.jackpotCounters[i].setValue(gamedatas.jackpots[i].length);
+
+            this.jackpotStocks[i] = new VoidStock<Card>(this.game.cardsManager, document.getElementById(`jackpot${i}`));
         }
 
         document.getElementById(`market-title`).innerHTML = _('Market');
@@ -43,14 +46,15 @@ class TableCenter {
             const element = this.market.getCardElement(card);
             const disabled = selectable && selectableCards != null && !selectableCards.some(s => s.id == card.id);
             element.classList.toggle('disabled', disabled);
-            element.classList.toggle('selectable', !disabled);
+            element.classList.toggle('selectable', selectable && !disabled);
         });
     }
 
     public newMarket(cards: Card[]) {
         this.market.removeAll();
         this.market.addCards(cards, {
-            originalSide: 'back'
+            originalSide: 'back',
+            fromElement: document.getElementById(`deck`),
         }, undefined, 50);
     }
 
@@ -62,5 +66,12 @@ class TableCenter {
     public setJackpot(color: number, count: number) {
         this.jackpotCounters[color].toValue(count);
         document.getElementById(`jackpot${color}`).dataset.count = `${count}`;
+    }
+    
+    public addJackpotCard(card: Card) {
+        this.setJackpot(card.color, this.jackpotCounters[card.color].getValue() + 1);
+        this.jackpotStocks[card.color].addCard(card, undefined, {
+            visible: false,
+        });
     }
 }

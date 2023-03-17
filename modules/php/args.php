@@ -23,6 +23,7 @@ trait ArgsTrait {
            'canPlaceOnLine' => $canPlaceOnLine,
            'canAddToLine' => count($canPlaceOnLine) > 0,
            'canAddToHand' => $canAddToHand,
+           'canClose' => intval($this->cards->countCardInLocation('line'.$playerId)) > 0,
         ];
     }
    
@@ -30,8 +31,7 @@ trait ArgsTrait {
         $playerId = intval($this->getActivePlayerId());
 
         $canPlaceOnLine = $this->canPlaceOnLine($playerId, []);
-        $args = $this->argChooseMarketCard();
-        $mustClose = !$args['canAddToLine'] && !$args['canAddToHand'];
+        $mustClose = boolval($this->getGameStateValue(FORCE_CLOSE));
     
         return [
            'canPlaceOnLine' => $canPlaceOnLine,

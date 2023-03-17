@@ -30,6 +30,7 @@ define('END_SCORE', 100);
  * Constants
  */
 define('FIRST_PLAYER', 10);
+define('FORCE_CLOSE', 11);
 
 
 // colors

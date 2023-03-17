@@ -105,6 +105,7 @@ $playerActionsGameStates = [
         ],
         "transitions" => [
             "next" => ST_NEXT_PLAYER,
+            "stay" => ST_PLAYER_PLAY_CARD,
         ],
     ],
 

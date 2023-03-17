@@ -46,11 +46,7 @@ class LineIt extends Table {
         
         self::initGameStateLabels([
             FIRST_PLAYER => FIRST_PLAYER,
-            //    "my_second_global_variable" => 11,
-            //      ...
-            //    "my_first_game_variant" => 100,
-            //    "my_second_game_variant" => 101,
-            //      ...
+            FORCE_CLOSE => FORCE_CLOSE,
         ]);   
 		
         $this->cards = $this->getNew("module.common.deck");
@@ -130,7 +126,7 @@ class LineIt extends Table {
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, player_no playerNo FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_no playerNo, player_tokens FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
   
         // Gather all information about current game situation (visible by player $current_player_id).
@@ -142,6 +138,9 @@ class LineIt extends Table {
             $player['hand'] = $currentPlayerId == $playerId ? $hand : Card::onlyIds($hand);
 
             $player['line'] = $this->getCardsByLocation('line'.$playerId);
+
+            $player['scored'] = intval($this->cards->countCardInLocation('scored', $playerId));
+            $player['betTokens'] = json_decode($player['player_tokens'], true);
         }
 
         $result['firstPlayerId'] = $this->getGameStateValue(FIRST_PLAYER);

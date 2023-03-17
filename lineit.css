@@ -372,7 +372,7 @@ body > .card {
   margin-right: 20px;
 }
 
-.deck {
+.card-deck {
   display: inline-block;
   position: relative;
   width: 100px;
@@ -384,11 +384,11 @@ body > .card {
   background-image: url("img/cards.jpg");
   box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.5);
 }
-.deck[data-count="0"] {
+.card-deck[data-count="0"] {
   box-shadow: unset;
   opacity: 0.5;
 }
-.deck .deck-counter {
+.card-deck .deck-counter {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -397,7 +397,7 @@ body > .card {
   text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black, 0 0 4px black, 0 0 5px black, 0 0 6px black;
   font-size: 30pt;
 }
-.deck .jackpot-token {
+.card-deck .jackpot-token {
   width: 100px;
   height: 100px;
   position: absolute;
@@ -407,16 +407,16 @@ body > .card {
   background-size: auto 100%;
   background-image: url("img/jackpot-icons.png");
 }
-.deck .jackpot-token[data-color="1"] {
+.card-deck .jackpot-token[data-color="1"] {
   background-position-x: 0%;
 }
-.deck .jackpot-token[data-color="2"] {
+.card-deck .jackpot-token[data-color="2"] {
   background-position-x: 33.3333333333%;
 }
-.deck .jackpot-token[data-color="3"] {
+.card-deck .jackpot-token[data-color="3"] {
   background-position-x: 66.6666666667%;
 }
-.deck .jackpot-token[data-color="4"] {
+.card-deck .jackpot-token[data-color="4"] {
   background-position-x: 100%;
 }
 
@@ -432,6 +432,9 @@ body > .card {
   align-items: center;
   margin: 5px 0;
 }
+.counters > div {
+  flex: 1;
+}
 .counters .icon {
   margin-right: 5px;
 }
@@ -443,7 +446,19 @@ body > .card {
   background-image: url("img/cards.svg");
   background-size: contain;
   background-repeat: no-repeat;
-  vertical-align: bottom;
+  background-position: center;
+  vertical-align: middle;
+}
+
+.player-scored-card {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  background-image: url("img/card-deck.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  vertical-align: middle;
 }
 
 .first-player-token-wrapper {
@@ -460,12 +475,47 @@ body > .card {
   box-shadow: 1px 1px 3px 1px black;
 }
 
+.bet-tokens {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 12px;
+  margin: 8px 0;
+}
+.bet-tokens .bet-token {
+  background-image: url("img/bet-tokens.png");
+  background-repeat: no-repeat;
+  background-size: auto 200%;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  box-shadow: 1px 1px 3px 1px black;
+  margin-left: -12px;
+}
+.bet-tokens .bet-token[data-value="3"] {
+  background-position: 0% 0%;
+}
+.bet-tokens .bet-token[data-value="-3"] {
+  background-position: 0% 100%;
+}
+.bet-tokens .bet-token[data-value="4"] {
+  background-position: 50% 0%;
+}
+.bet-tokens .bet-token[data-value="-4"] {
+  background-position: 50% 100%;
+}
+.bet-tokens .bet-token[data-value="5"] {
+  background-position: 100% 0%;
+}
+.bet-tokens .bet-token[data-value="-5"] {
+  background-position: 100% 100%;
+}
+
 .player-table {
   font-family: "p22_undergroundheavy";
   width: 100%;
   position: relative;
   background: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 5px 2px var(--player-color);
+  border: 2px solid rgba(255, 255, 255, 0.5333333333);
   border-radius: 15px;
   margin: 5px;
   font-size: 16pt;

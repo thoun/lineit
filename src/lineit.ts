@@ -19,6 +19,7 @@ class LineIt implements LineItGame {
     private tableCenter: TableCenter;
     private playersTables: PlayerTable[] = [];
     private handCounters: Counter[] = [];
+    private scoredCounters: Counter[] = [];
     private selectedCardId: number;
     
     private TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
@@ -86,24 +87,10 @@ class LineIt implements LineItGame {
             case 'chooseMarketCard':
                 this.onEnteringChooseMarketCard(args.args);
                 break;
-           case 'playCard':
+            case 'playCard':
+            case 'playHandCard':
                 this.onEnteringPlayCard(args.args);
                 break;
-            /*case 'putDiscardPile':
-                this.onEnteringPutDiscardPile(args.args);
-                break;
-            case 'playCards':
-                this.onEnteringPlayCards();
-                break;
-            case 'chooseDiscardPile':
-                this.onEnteringChooseDiscardPile();
-                break;
-            case 'chooseDiscardCard':
-                this.onEnteringChooseDiscardCard(args.args);
-                break;
-            case 'chooseOpponent':
-                this.onEnteringChooseOpponent(args.args);
-                break;*/
         }
     }
     
@@ -118,12 +105,17 @@ class LineIt implements LineItGame {
         if ((this as any).isCurrentPlayerActive()) {
             this.selectedCardId = null;
             this.tableCenter.setSelectable(true, args.canAddToHand ? null : args.canPlaceOnLine);
+            this.getCurrentPlayerTable()?.setSelectable(true, args.canPlaceOnLine);
         }
     }
     
     private onEnteringPlayCard(args: EnteringPlayCardArgs) {
         if (args.mustClose) {
             this.setGamestateDescription(`Forced`);
+        }
+        
+        if ((this as any).isCurrentPlayerActive()) {
+            this.getCurrentPlayerTable()?.setSelectable(true, args.canPlaceOnLine);
         }
     }
 
@@ -134,36 +126,13 @@ class LineIt implements LineItGame {
            case 'chooseMarketCard':
                 this.selectedCardId = null;
                 this.tableCenter.setSelectable(false);
+                this.getCurrentPlayerTable()?.setSelectable(false);
+                break;
+            case 'playCard':
+            case 'playHandCard':
+                this.getCurrentPlayerTable()?.setSelectable(false);
                 break;
         }
-    }
-
-   /* private onLeavingTakeCards() {
-        this.stacks.makeDeckSelectable(false);
-        this.stacks.makeDiscardSelectable(false);
-    }
-    
-    private onLeavingChooseCard() {
-        this.stacks.makePickSelectable(false);
-    }
-
-    private onLeavingPutDiscardPile() {
-        this.stacks.makeDiscardSelectable(false);
-    }
-
-    private onLeavingPlayCards() {
-        this.selectedCards = null;
-        this.getCurrentPlayerTable()?.setSelectable(false);
-    }
-
-    private onLeavingChooseDiscardCard() {
-        const pickDiv = document.getElementById('discard-pick');
-        pickDiv.dataset.visible = 'false';
-        this.updateTableHeight();
-    }*/
-
-    private onLeavingChooseOpponent() {
-        (Array.from(document.querySelectorAll('[data-can-steal]')) as HTMLElement[]).forEach(elem => elem.dataset.canSteal = 'false');
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -174,20 +143,29 @@ class LineIt implements LineItGame {
             switch (stateName) {
                 case 'chooseMarketCard':
                     this.selectedCardId = null;
+                    const chooseMarketCardArgs = args as EnteringChooseMarketCardArgs;
                     (this as any).addActionButton(`addLine_button`, _("Add selected card to line"), () => this.chooseMarketCardLine());
                     (this as any).addActionButton(`addHand_button`, _("Add selected card to hand"), () => this.chooseMarketCardHand());
                     [`addLine_button`, `addHand_button`].forEach(id => document.getElementById(id).classList.add('disabled'));
+
+                    (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
+                    if (!chooseMarketCardArgs.canClose) {
+                        document.getElementById(`closeLine_button`).classList.add('disabled');
+                    }
                     break;
                 case 'playCard':
                     const playCardArgs = args as EnteringPlayCardArgs;
-                    (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
                     (this as any).addActionButton(`pass_button`, _("Pass"), () => this.pass());
-                    if (!playCardArgs.canClose) {
-                        document.getElementById(`closeLine_button`).classList.add('disabled');
-                    }                    
                     if (playCardArgs.mustClose) {
                         document.getElementById(`pass_button`).classList.add('disabled');
                     }
+                    (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
+                    if (!playCardArgs.canClose) {
+                        document.getElementById(`closeLine_button`).classList.add('disabled');
+                    }
+                    break;
+                case 'playHandCard':
+                    (this as any).addActionButton(`pass_button`, _("Pass"), () => this.pass());
                     break;
             }
         }
@@ -280,11 +258,15 @@ class LineIt implements LineItGame {
         Object.values(gamedatas.players).forEach(player => {
             const playerId = Number(player.id);   
 
-            // hand cards counter
+            // hand + scored cards counter
             dojo.place(`<div class="counters">
                 <div id="playerhand-counter-wrapper-${player.id}" class="playerhand-counter">
                     <div class="player-hand-card"></div> 
                     <span id="playerhand-counter-${player.id}"></span>
+                </div>
+                <div id="scored-counter-wrapper-${player.id}" class="scored-counter">
+                    <div class="player-scored-card"></div> 
+                    <span id="scored-counter-${player.id}"></span>
                 </div>
             </div>`, `player_board_${player.id}`);
 
@@ -293,8 +275,24 @@ class LineIt implements LineItGame {
             handCounter.setValue(player.hand.length);
             this.handCounters[playerId] = handCounter;
 
+            const scoredCounter = new ebg.counter();
+            scoredCounter.create(`scored-counter-${playerId}`);
+            scoredCounter.setValue(player.scored);
+            this.scoredCounters[playerId] = scoredCounter;
+
             // first player
-            dojo.place(`<div id="first-player-token-wrapper-${player.id}" class="first-player-token-wrapper"></div>`, `player_board_${player.id}`);
+            dojo.place(`
+            <div id="bet-tokens-${player.id}" class="bet-tokens"></div>
+            <div id="first-player-token-wrapper-${player.id}" class="first-player-token-wrapper"></div>
+            `, `player_board_${player.id}`);
+
+            Object.keys(player.betTokens).forEach(key => {
+                const value = Number(key);
+                for (let i = 0; i < player.betTokens[key]; i++) {
+                    this.addBetToken(playerId, value);
+                }
+            });
+
             if (gamedatas.firstPlayerId == playerId) {
                 dojo.place(`<div id="first-player-token" class="first-player-token"></div>`, `first-player-token-wrapper-${player.id}`);
             }
@@ -315,6 +313,22 @@ class LineIt implements LineItGame {
         const table = new PlayerTable(this, gamedatas.players[playerId]);
         this.playersTables.push(table);
     }
+
+    private addBetToken(playerId: number, value: number) {
+        document.getElementById(`bet-tokens-${playerId}`).insertAdjacentHTML('beforeend', `
+            <div class="bet-token" data-value="${value}" style="order: ${value}"></div>
+        `);
+    }
+
+    private incScore(playerId: number, inc: number) {
+        (this as any).scoreCtrl[playerId]?.incValue(inc);
+    }
+
+    private incScored(playerId: number, inc: number) {
+        this.scoredCounters[playerId].incValue(inc);
+        this.incScore(playerId, inc);
+    }
+    
 
     public onMarketCardClick(card: Card): void {
         const args: EnteringChooseMarketCardArgs = this.gamedatas.gamestate.args;
@@ -361,7 +375,15 @@ class LineIt implements LineItGame {
         });
     }
   	
-    public closeLine() {
+    public closeLine(confirmed: boolean = false) {
+        if (!confirmed && !this.gamedatas.gamestate.args.mustClose) {
+            (this as any).confirmationDialog(
+                _("Are you sure you want to close this line ?"), 
+                () => this.closeLine(true)
+            );
+            return;
+        }
+
         if(!(this as any).checkAction('closeLine')) {
             return;
         }
@@ -427,14 +449,15 @@ class LineIt implements LineItGame {
         } else {
             this.tableCenter.market.removeCard(notif.args.card);
         }
+        this.handCounters[notif.args.playerId].incValue(1);
     }
 
     notif_jackpotRemaining(notif: Notif<NotifJackpotRemainingArgs>) {
-        console.log('jackpotRemaining', notif.args);
+        this.tableCenter.addJackpotCard(notif.args.card);
     }
 
     notif_discardRemaining(notif: Notif<NotifJackpotRemainingArgs>) {
-        console.log('discardRemaining', notif.args);
+        this.tableCenter.market.removeCard(notif.args.card);
     }
 
     notif_newFirstPlayer(notif: Notif<NotifNewFirstPlayerArgs>) {
@@ -451,19 +474,25 @@ class LineIt implements LineItGame {
     }
 
     notif_playCard(notif: Notif<NotifPlayCardArgs>) {
-        this.getPlayerTable(notif.args.playerId).hand.addCard(notif.args.card);
+        this.getPlayerTable(notif.args.playerId).line.addCard(notif.args.card);
+        if (notif.args.fromHand) {
+            this.handCounters[notif.args.playerId].incValue(-1);
+        }
     }
 
     notif_applyJackpot(notif: Notif<NotifApplyJackpotArgs>) {
-        console.log('applyJackpot', notif.args);
+        this.incScored(notif.args.playerId, Number(notif.args.count));
+        this.tableCenter.setJackpot(notif.args.color, 0);
     }
 
     notif_betResult(notif: Notif<NotifBetResultArgs>) {
-        console.log('betResult', notif.args);
+        this.addBetToken(notif.args.playerId, notif.args.value);
+        this.incScore(notif.args.playerId, Number(notif.args.value));
     }
 
     notif_closeLine(notif: Notif<NotifApplyJackpotArgs>) {
-        console.log('closeLine', notif.args);
+        this.getPlayerTable(notif.args.playerId).line.removeAll();
+        this.incScored(notif.args.playerId, Number(notif.args.count));
     }
 
 
