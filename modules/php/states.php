@@ -67,7 +67,7 @@ trait StateTrait {
                     'color' => $card->color,
                     'card' => $card,
                     'cardValue' => '',
-                    'preserve' => ['card', 'cardValue'],
+                    'preserve' => ['color', 'colorName'],
                 ]);
             } else if ($card->type == 2) {
                 $this->cards->moveCard($card->id, 'discard');

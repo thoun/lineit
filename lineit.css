@@ -358,6 +358,7 @@ body > .card {
 }
 #table-center #market-title {
   margin-top: 20px;
+  text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black, 0 0 4px black;
 }
 
 #decks {
@@ -588,4 +589,24 @@ html, .mode_3d #game_play_area_background {
 .log [data-color="4"] {
   color: #FFC30D;
   text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black;
+}
+.log .jackpot-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  vertical-align: middle;
+  background-size: auto 100%;
+  background-image: url("img/jackpot-icons.png");
+}
+.log .jackpot-icon[data-color="1"] {
+  background-position-x: 0%;
+}
+.log .jackpot-icon[data-color="2"] {
+  background-position-x: 33.3333333333%;
+}
+.log .jackpot-icon[data-color="3"] {
+  background-position-x: 66.6666666667%;
+}
+.log .jackpot-icon[data-color="4"] {
+  background-position-x: 100%;
 }

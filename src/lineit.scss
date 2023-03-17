@@ -106,4 +106,21 @@ html, .mode_3d #game_play_area_background {
     text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black;
   }
 
+  
+
+  .jackpot-icon {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    vertical-align: middle;
+    background-size: auto 100%;
+    background-image: url('img/jackpot-icons.png');
+
+    @for $color from 1 through 4 {
+        &[data-color="#{$color}"] {
+            background-position-x: #{($color - 1) * 100% / 3};
+        }
+    }
+}
+
 }

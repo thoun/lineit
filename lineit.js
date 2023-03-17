@@ -1689,6 +1689,9 @@ var LineIt = /** @class */ (function () {
                 if (args.cardValue == '' && args.card) {
                     args.cardValue = "<strong data-color=\"".concat(args.card.color, "\">").concat(args.card.type == 2 && args.card.number > 0 ? '+' : '').concat(args.card.number, "</strong>");
                 }
+                if (typeof args.colorName == 'string' && args.colorName[0] !== '<' && args.color) {
+                    args.colorName = "<div class=\"jackpot-icon\" data-color=\"".concat(args.color, "\"></div>");
+                }
             }
         }
         catch (e) {

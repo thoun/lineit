@@ -475,6 +475,9 @@ class LineIt implements LineItGame {
                 if (args.cardValue == '' && args.card) {
                     args.cardValue = `<strong data-color="${args.card.color}">${args.card.type == 2 && args.card.number > 0 ? '+' : ''}${args.card.number}</strong>`;
                 }
+                if (typeof args.colorName == 'string' && args.colorName[0] !== '<' && args.color) {
+                    args.colorName = `<div class="jackpot-icon" data-color="${args.color}"></div>`;
+                }
             }
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);
