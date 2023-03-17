@@ -48,6 +48,81 @@
 */
 
 $commonStats = [
+    "increasingLines" => [
+        "id" => 15,
+        "name" => totranslate("Increasing numbers lines"),
+        "type" => "int"
+    ],
+    "decreasingLines" => [
+        "id" => 16,
+        "name" => totranslate("Decreasing numbers lines"),
+        "type" => "int"
+    ],
+
+    "marketToHand" => [
+        "id" => 20,
+        "name" => totranslate("Market cards added to hand"),
+        "type" => "int"
+    ],
+    "marketToLine" => [
+        "id" => 21,
+        "name" => totranslate("Market cards added to hand"),
+        "type" => "int"
+    ],
+    "playedCardFromHand" => [
+        "id" => 22,
+        "name" => totranslate("Cards played from hand"),
+        "type" => "int"
+    ],
+
+    "closedLines" => [
+        "id" => 30,
+        "name" => totranslate("Closed lines"),
+        "type" => "int"
+    ],
+    "closedLinesForced" => [
+        "id" => 31,
+        "name" => totranslate("Closed lines (forced)"),
+        "type" => "int"
+    ],
+    
+    "betCardsPlayed" => [
+        "id" => 40,
+        "name" => totranslate("Bet cards played"),
+        "type" => "int"
+    ],
+    "betWon" => [
+        "id" => 41,
+        "name" => totranslate("Bet won"),
+        "type" => "int"
+    ],
+    "betLost" => [
+        "id" => 42,
+        "name" => totranslate("Bet lost"),
+        "type" => "int"
+    ],
+    
+    "jackpotCollected" => [
+        "id" => 50,
+        "name" => totranslate("Jackpot collected"),
+        "type" => "int"
+    ],
+
+    "pointsFromJackpots" => [
+        "id" => 60,
+        "name" => totranslate("Points from jackpot cards"),
+        "type" => "int"
+    ],
+    "pointsFromLines" => [
+        "id" => 61,
+        "name" => totranslate("Points from scored line cards"),
+        "type" => "int"
+    ],
+    "pointsFromBet" => [
+        "id" => 62,
+        "name" => totranslate("Points from bets"),
+        "type" => "int"
+    ],
 ];
 
 $stats_type = [
@@ -62,6 +137,5 @@ $stats_type = [
     
     // Statistics existing for each player
     "player" => $commonStats + [
-
     ],
 ];

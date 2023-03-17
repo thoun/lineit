@@ -17,10 +17,12 @@ trait StateTrait {
         // place new market cards
         $this->cards->pickCardsForLocation($this->getRoundCardCount(), 'deck', 'market'); 
 
-        self::notifyAllPlayers('newMarket', clienttranslate('Marked is refilled'), [
-            'cards' => $this->getCardsByLocation('market'),
-            'deck' => intval($this->cards->countCardInLocation('deck')),
-        ]);
+        if (intval($this->getStat('roundNumber')) > 0) { 
+            self::notifyAllPlayers('newMarket', clienttranslate('Marked is refilled'), [
+                'cards' => $this->getCardsByLocation('market'),
+                'deck' => intval($this->cards->countCardInLocation('deck')),
+            ]);
+        }
 
         $this->gamestate->nextState('next');
     }

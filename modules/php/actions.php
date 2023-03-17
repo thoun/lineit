@@ -27,6 +27,9 @@ trait ActionTrait {
             self::DbQuery("update player set player_played_hand = 1 where player_id = $playerId");
         }
 
+        $this->incStat(1, 'playedCardFromHand');   
+        $this->incStat(1, 'playedCardFromHand', $playerId);   
+
         $this->gamestate->nextState($stateName == 'playHandCard' ? 'next' : 'stay');
     }
 
@@ -41,6 +44,9 @@ trait ActionTrait {
         }
 
         $this->playCard($playerId, $id, true);
+
+        $this->incStat(1, 'marketToLine');   
+        $this->incStat(1, 'marketToLine', $playerId);   
 
         $this->gamestate->nextState('next');
     }
@@ -66,6 +72,9 @@ trait ActionTrait {
             'preserve' => ['card', 'cardValue'],
         ]);
 
+        $this->incStat(1, 'marketToHand');   
+        $this->incStat(1, 'marketToHand', $playerId);   
+
         $this->gamestate->nextState('next');
     }
   	
@@ -75,6 +84,11 @@ trait ActionTrait {
         $playerId = intval($this->getActivePlayerId());
 
         $this->applyCloseLine($playerId);
+        
+        if (boolval($this->getGameStateValue(FORCE_CLOSE))) {
+            $this->incStat(1, 'closedLines');   
+            $this->incStat(1, 'closedLines', $playerId);   
+        }
 
         $this->gamestate->nextState('stay');
     }

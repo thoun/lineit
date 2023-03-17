@@ -81,6 +81,7 @@ $playerActionsGameStates = [
         "action" => "stChooseMarketCard",
         "possibleactions" => [ 
             "playCardFromHand",
+            "closeLine",
             "chooseMarketCardLine",
             "chooseMarketCardHand",
         ],

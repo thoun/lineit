@@ -170,6 +170,9 @@ trait UtilTrait {
 
         if ($card->type == 1) {
             $this->checkJackpot($playerId, $card->color);
+        } else if ($card->type == 2) {
+            $this->incStat(1, 'betCardsPlayed');   
+            $this->incStat(1, 'betCardsPlayed', $playerId);   
         }
     }
 
@@ -193,6 +196,11 @@ trait UtilTrait {
             'count' => $jackpotCardsCount,
             'color' => $color,
         ]);
+        $this->incStat(1, 'jackpotCollected');   
+        $this->incStat(1, 'jackpotCollected', $playerId); 
+
+        $this->incStat($jackpotCardsCount, 'pointsFromJackpots');   
+        $this->incStat($jackpotCardsCount, 'pointsFromJackpots', $playerId);   
     }
 
     function applyCloseLine(int $playerId) {
@@ -222,6 +230,12 @@ trait UtilTrait {
                 'cardValue' => '',
                 'preserve' => ['card', 'cardValue'],
             ]);
+
+            $statName = $betWon ? 'betWon' : 'betLost' ;
+            $this->incStat(1, $statName);   
+            $this->incStat(1, $statName, $playerId);  
+            $this->incStat($tokenNumber, 'pointsFromBet');   
+            $this->incStat($tokenNumber, 'pointsFromBet', $playerId);  
         }
 
         $discardedCards = array_slice($line, 0, 3);
@@ -242,6 +256,17 @@ trait UtilTrait {
             'count' => count($scoredCards),
             'removed' => count($discardedCards),
         ]);
+
+        $this->incStat(count($scoredCards), 'pointsFromLines');   
+        $this->incStat(count($scoredCards), 'pointsFromLines', $playerId); 
+        if (count($lineWithoutBet) >= 2) {
+            $statName = $lineWithoutBet[1]->number > $lineWithoutBet[0]->number ? 'increasingLines' : 'decreasingLines';
+            $this->incStat(1, $statName);   
+            $this->incStat(1, $statName, $playerId);   
+        }
+        
+        $this->incStat(1, 'closedLines');   
+        $this->incStat(1, 'closedLines', $playerId);   
     }
 
     function getColorName(int $color) {
