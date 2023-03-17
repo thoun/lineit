@@ -11,9 +11,16 @@ define('ST_PLAYER_CHOOSE_MARKET_CARD', 30);
 
 define('ST_PLAYER_PLAY_CARD', 40);
 
-define('ST_NEXT_PLAYER', 80);
+define('ST_NEXT_PLAYER', 50);
 
-define('ST_END_ROUND', 85);
+define('ST_END_ROUND', 55);
+
+define('ST_END_DECK', 60);
+
+define('ST_PLAYER_END_PLAY_HAND_CARD', 70);
+
+define('ST_END_NEXT_PLAYER', 80);
+
 define('ST_END_SCORE', 90);
 
 define('ST_END_GAME', 99);

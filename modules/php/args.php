@@ -39,4 +39,14 @@ trait ArgsTrait {
            'mustClose' => $mustClose,
         ];
     }
+
+    function argPlayHandCard() {
+        $playerId = intval($this->getActivePlayerId());
+
+        $canPlaceOnLine = $this->canPlaceOnLine($playerId, []);
+    
+        return [
+           'canPlaceOnLine' => $canPlaceOnLine,
+        ];
+    }
 } 

@@ -66,7 +66,7 @@ trait ActionTrait {
         
         $playerId = intval($this->getActivePlayerId());
 
-        $this->closeLine($playerId);
+        $this->applyCloseLine($playerId);
 
         $this->gamestate->nextState('next');
     }

@@ -107,6 +107,22 @@ $playerActionsGameStates = [
             "next" => ST_NEXT_PLAYER,
         ],
     ],
+
+    ST_PLAYER_END_PLAY_HAND_CARD => [
+        "name" => "playHandCard",
+        "description" => clienttranslate('${actplayer} can play a card (end game)'),
+        "descriptionmyturn" => clienttranslate('${you} can play a card (end game)'),
+        "type" => "activeplayer",    
+        "args" => "argPlayHandCard",
+        "action" => "stPlayHandCard",
+        "possibleactions" => [ 
+            "playCardFromHand",
+            "pass",
+        ],
+        "transitions" => [
+            "next" => ST_END_NEXT_PLAYER,
+        ],
+    ],
 ];
 
 $gameGameStates = [
@@ -141,6 +157,29 @@ $gameGameStates = [
         "updateGameProgression" => true,
         "transitions" => [
             "newRound" => ST_NEW_ROUND,
+            "endDeck" => ST_END_DECK,
+        ],
+    ],
+
+    ST_END_DECK => [
+        "name" => "endDeck",
+        "description" => "",
+        "type" => "game",
+        "action" => "stEndDeck",
+        "updateGameProgression" => true,
+        "transitions" => [
+            "next" => ST_PLAYER_END_PLAY_HAND_CARD,
+            "endScore" => ST_END_SCORE,
+        ],
+    ],
+
+    ST_END_NEXT_PLAYER => [
+        "name" => "endNextPlayer",
+        "description" => "",
+        "type" => "game",
+        "action" => "stEndNextPlayer",
+        "transitions" => [
+            "nextPlayer" => ST_PLAYER_END_PLAY_HAND_CARD,
             "endScore" => ST_END_SCORE,
         ],
     ],

@@ -134,13 +134,13 @@ trait UtilTrait {
     function getPlayer(int $id) {
         $sql = "SELECT * FROM player WHERE player_id = $id";
         $dbResults = $this->getCollectionFromDb($sql);
-        return array_map(fn($dbResult) => new Player($dbResult), array_values($dbResults))[0];
+        return array_map(fn($dbResult) => new LineItPlayer($dbResult), array_values($dbResults))[0];
     }
    
     function getPlayers() {
         $sql = "SELECT * FROM player ORDER BY player_no";
         $dbResults = $this->getCollectionFromDb($sql);
-        return array_map(fn($dbResult) => new Player($dbResult), array_values($dbResults));
+        return array_map(fn($dbResult) => new LineItPlayer($dbResult), array_values($dbResults));
     }
 
     function playCard(int $playerId, int $id) {
@@ -160,10 +160,36 @@ trait UtilTrait {
             'preserve' => ['card', 'cardValue'],
         ]);
 
-        // TODO check jackpot
+        if ($card->type == 1) {
+            $this->checkJackpot($playerId, $card->color);
+        }
     }
 
-    function closeLine(int $playerId) {
+    function checkJackpot(int $playerId, int $color) {        
+        $line = $this->getCardsByLocation('line'.$playerId);
+        $lineColorCards = count(array_filter($line, fn($card) => $card->type == 1 && $card->color == $color));
+        if ($lineColorCards == 3) {
+            $this->applyJackpot($playerId, $color);
+        }
+    }
+
+    function applyJackpot(int $playerId, int $color) {
+        $jackpotCardsCount = intval($this->cards->countCardInLocation('jackpot', $color));
+        if ($jackpotCardsCount > 0) {
+            $this->cards->moveAllCardsInLocation('jackpot', 'scored', $color, $playerId);
+        }
+        self::notifyAllPlayers('applyJackpot', clienttranslate('${player_name} adds ${count} card(s) from the jackpot pile to scored cards'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'count' => $jackpotCardsCount,
+            'color' => $color,
+        ]);
+    }
+
+    function applyCloseLine(int $playerId) {
+
+        self::notifyAllPlayers('log', clienttranslate('${player_name} closes his line'), []);
+
         $line = $this->getCardsByLocation('line'.$playerId);
         $lineWithoutBet = array_values(array_filter($line, fn($card) => $card->type == 1));
         $betCard = $this->array_find($line, fn($card) => $card->type == 2);
@@ -177,9 +203,13 @@ trait UtilTrait {
             $tokens[$tokenNumber]++;
             $this->DbQuery("UPDATE player SET `player_tokens` = '".json_encode($tokens)."' WHERE player_id = $playerId");
 
-            // TODO notif
-
-            // TOCHECK $this->cards->moveCard($betCard->id, 'discard');
+            self::notifyAllPlayers('betResult', $betWon ? clienttranslate('${player_name} won the ${cardValue} bet') : clienttranslate('${player_name} lost the ${cardValue} bet'), [
+                'playerId' => $playerId,
+                'player_name' => $this->getPlayerName($playerId),
+                'card' => $betCard,
+                'cardValue' => '',
+                'preserve' => ['card', 'cardValue'],
+            ]);
         }
 
         $discardedCards = array_slice($line, 0, 3);
@@ -193,8 +223,12 @@ trait UtilTrait {
             $this->cards->moveCards(array_map(fn($card) => $card->id, $scoredCards), 'scored', $playerId);
         }
 
-        // TODO notif
-
+        self::notifyAllPlayers('closeLine', clienttranslate('${player_name} adds ${count} card(s) from the line to scored cards (${removed} removed cards)'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'count' => count($scoredCards),
+            'removed' => count($discardedCards),
+        ]);
     }
 
     function getColor(int $color) {

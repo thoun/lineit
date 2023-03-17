@@ -38,7 +38,6 @@ trait StateTrait {
         if ($endRound) {
             $this->gamestate->nextState('endRound');
         } else {
-            $this->activeNextPlayer();
             $this->gamestate->nextState('nextPlayer');
         }
     }
@@ -74,11 +73,11 @@ trait StateTrait {
             $this->setFirstPlayer($this->activeNextPlayer());
         }
 
-        $this->gamestate->nextState($lastRound ? 'endScore' : 'newRound');
+        $this->gamestate->nextState($lastRound ? 'endDeck' : 'newRound');
     }
 
-    function stEndScore() {
-        $playersIds = $this->getPlayersIds();
+    function stEndDeck() {
+        self::DbQuery("update player set player_played_hand = 0");
 
         // place remaining deck cards on jackpot
         self::notifyAllPlayers('log', clienttranslate('Remaining cards in deck are placed on Jackpot tokens...'), []);
@@ -105,12 +104,59 @@ trait StateTrait {
             }
         }
 
-        // TODO TOCHECK play automatically ?
-        /*
-En commençant par le premier joueur, vous pouvez jouer une première carte de
-votre main. Puis vous répétez cette étape avec la seconde.*/
-    foreach($playersIds as $playerId) {
-        $this->closeLine($playerId);
+        if (intval($this->cards->countCardInLocation('hand')) > 0) {
+            self::notifyAllPlayers('log', clienttranslate('Players with cards in hand can now play a card'), []);
+
+            $this->gamestate->nextState('next');
+        } else {
+            self::notifyAllPlayers('log', clienttranslate('All players hands are empty, next step is scoring'), []);
+
+            $this->gamestate->nextState('endScore');
+        }
+    }
+
+    function stPlayHandCard() {
+        $playerId = intval($this->getActivePlayerId());
+
+        $player = $this->getPlayer($playerId);
+        if ($player->playedHand || intval($this->cards->countCardInLocation('hand', $player->id)) == 0) {
+            $this->gamestate->nextState('next');
+        }
+    }
+
+    function stEndNextPlayer() {
+        $playerId = intval($this->getActivePlayerId());
+
+        $this->giveExtraTime($playerId);
+        
+        $endGame = true;
+        $players = $this->getPlayers();
+        foreach($players as $player) {
+            if (!$player->playedHand && intval($this->cards->countCardInLocation('hand', $player->id)) > 0) {
+                $endGame = false;
+                break;
+            }
+        }
+
+        if ($endGame) {
+            $this->gamestate->nextState('endScore');
+        } else {
+            $this->activeNextPlayer();
+            $this->gamestate->nextState('nextPlayer');
+        }
+    }
+
+    function stEndScore() {
+        $playersIds = $this->getPlayersIds();
+
+        foreach($playersIds as $playerId) {
+            $this->applyCloseLine($playerId);
+        }
+
+    
+    /*foreach($playersIds as $playerId) {
+        $scoredCards = intval($this->cards->countCardInLocation('scored'));
+    }
         /*
 Chaque carte Numéro dans votre pile de score rapporte 1 point, auquel vous ajoutez
 les bonus ou malus de vos jetons Pari.
