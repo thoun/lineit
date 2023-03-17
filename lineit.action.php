@@ -38,30 +38,49 @@
             self::trace( "Complete reinitialization of board game" );
       }
   	} 
-  	
-  	// TODO: defines your action entry points there
 
-
-    /*
-    
-    Example:
-  	
-    public function myAction()
-    {
+    public function playCardFromHand() {
         self::setAjaxMode();     
 
-        // Retrieve arguments
-        // Note: these arguments correspond to what has been sent through the javascript "ajaxcall" method
-        $arg1 = self::getArg( "myArgument1", AT_posint, true );
-        $arg2 = self::getArg( "myArgument2", AT_posint, true );
+        $id = self::getArg("id", AT_posint, true);
+        $this->game->playCardFromHand($id);
 
-        // Then, call the appropriate method in your game logic, like "playCard" or "myAction"
-        $this->game->myAction( $arg1, $arg2 );
-
-        self::ajaxResponse( );
+        self::ajaxResponse();
     }
-    
-    */
+
+    public function chooseMarketCardLine() {
+        self::setAjaxMode();     
+
+        $id = self::getArg("id", AT_posint, true);
+        $this->game->chooseMarketCardLine($id);
+
+        self::ajaxResponse();
+    }
+
+    public function chooseMarketCardHand() {
+        self::setAjaxMode();     
+
+        $id = self::getArg("id", AT_posint, true);
+        $this->game->chooseMarketCardHand($id);
+
+        self::ajaxResponse();
+    }
+
+    public function closeLine() {
+        self::setAjaxMode();     
+
+        $this->game->closeLine();
+
+        self::ajaxResponse();
+    }
+
+    public function pass() {
+        self::setAjaxMode();     
+
+        $this->game->pass();
+
+        self::ajaxResponse();
+    }
 
   }
   

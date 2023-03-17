@@ -80,11 +80,13 @@ $playerActionsGameStates = [
         "args" => "argChooseMarketCard",
         "action" => "stChooseMarketCard",
         "possibleactions" => [ 
+            "playCardFromHand",
             "chooseMarketCardLine",
             "chooseMarketCardHand",
         ],
         "transitions" => [
             "next" => ST_PLAYER_PLAY_CARD,
+            "stay" => ST_PLAYER_CHOOSE_MARKET_CARD,
         ]
     ],
 
@@ -99,6 +101,7 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "playCardFromHand",
             "closeLine",
+            "pass",
         ],
         "transitions" => [
             "next" => ST_NEXT_PLAYER,

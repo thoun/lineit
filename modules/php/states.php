@@ -12,6 +12,8 @@ trait StateTrait {
     */
 
     function stNewRound() {
+        self::DbQuery("update player set player_played_hand = 0");
+
         // place new market cards
         $this->cards->pickCardsForLocation($this->getRoundCardCount(), 'deck', 'market'); 
 
@@ -48,10 +50,23 @@ trait StateTrait {
         foreach($cards as $card) {
             if ($card->type == 1) {
                 $this->cards->moveCard($card->id, 'jackpot', $card->color);
+            
+                self::notifyAllPlayers('jackpotRemaining', clienttranslate('Card ${cardValue} is added to the jackpot ${colorName}'), [
+                    'colorName' => $this->getColorName($card->color),
+                    'color' => $card->color,
+                    'card' => $card,
+                    'cardValue' => '',
+                    'preserve' => ['card', 'cardValue'],
+                ]);
             } else if ($card->type == 2) {
                 $this->cards->moveCard($card->id, 'discard');
+            
+                self::notifyAllPlayers('discardRemaining', clienttranslate('Card ${cardValue} is discarded'), [
+                    'card' => $card,
+                    'cardValue' => '',
+                    'preserve' => ['card', 'cardValue'],
+                ]);
             }
-            // TODO notif
         }
 
         $lastRound = intval($this->cards->countCardInLocation('deck')) < $this->getRoundCardCount();
@@ -65,22 +80,55 @@ trait StateTrait {
     function stEndScore() {
         $playersIds = $this->getPlayersIds();
 
-        /* TODO $scenarioId = $this->getScenarioId();
-        $scenario = $this->getScenario();
-
-        $this->scoreMissions($playersIds, $scenario);
-        $this->scoreTerritoryControl($playersIds, $scenario);
-        $this->scoreDiscoverTiles($playersIds);
-        $this->scoreScenarioEndgameObjectives($scenarioId);
-        $this->scoreObjectiveTokens($playersIds);
-
-        // update player_score_aux
-        $initiativeMarkerControlledPlayer = $this->getTerritoryControlledPlayer(intval($this->getGameStateValue(INITIATIVE_MARKER_TERRITORY)));
-        if ($initiativeMarkerControlledPlayer !== null) {
-            $this->DbQuery("UPDATE `player` SET `player_score_aux` = 1 WHERE `player_id` = $initiativeMarkerControlledPlayer"); 
+        // place remaining deck cards on jackpot
+        self::notifyAllPlayers('log', clienttranslate('Remaining cards in deck are placed on Jackpot tokens...'), []);
+        $cards = $this->getCardsByLocation('deck');
+        foreach($cards as $card) {
+            if ($card->type == 1) {
+                $this->cards->moveCard($card->id, 'jackpot', $card->color);
+            
+                self::notifyAllPlayers('jackpotRemaining', clienttranslate('Card ${cardValue} is added to the jackpot ${colorName}'), [
+                    'colorName' => $this->getColorName($card->color),
+                    'color' => $card->color,
+                    'card' => $card,
+                    'cardValue' => '',
+                    'preserve' => ['card', 'cardValue'],
+                ]);
+            } else if ($card->type == 2) {
+                $this->cards->moveCard($card->id, 'discard');
+            
+                self::notifyAllPlayers('discardRemaining', clienttranslate('Card ${cardValue} is discarded'), [
+                    'card' => $card,
+                    'cardValue' => '',
+                    'preserve' => ['card', 'cardValue'],
+                ]);
+            }
         }
 
-        $this->endStats($playersIds);*/
+        // TODO TOCHECK play automatically ?
+        /*
+En commençant par le premier joueur, vous pouvez jouer une première carte de
+votre main. Puis vous répétez cette étape avec la seconde.*/
+    foreach($playersIds as $playerId) {
+        $this->closeLine($playerId);
+        /*
+Chaque carte Numéro dans votre pile de score rapporte 1 point, auquel vous ajoutez
+les bonus ou malus de vos jetons Pari.
+
+
+
+    function setPlayerScore(int $playerId, int $score) {
+        $this->DbQuery("UPDATE player SET `player_score` = $score WHERE player_id = $playerId");
+            
+        $this->notifyAllPlayers('score', clienttranslate('${player_name} ends ${cardValue} to line'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'score' => $score,
+        ]);
+    }
+
+Le joueur ayant le meilleur score remporte la partie !
+En cas d'égalité, la victoire est partagée.*/
 
         $this->gamestate->nextState('endGame');
     }

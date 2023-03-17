@@ -16,10 +16,11 @@ trait ArgsTrait {
         $playerId = intval($this->getActivePlayerId());
 
         $market = $this->getCardsByLocation('market');
-        $canPlaceOnLine = $this->canCompleteLine($playerId, $market);
+        $canPlaceOnLine = $this->canPlaceOnLine($playerId, $market);
         $canAddToHand = intval($this->cards->countCardInLocation('hand', $playerId)) < 2;
     
         return [
+           'canPlaceOnLine' => $canPlaceOnLine,
            'canAddToLine' => count($canPlaceOnLine) > 0,
            'canAddToHand' => $canAddToHand,
         ];
@@ -27,9 +28,15 @@ trait ArgsTrait {
    
     function argPlayCard() {
         $playerId = intval($this->getActivePlayerId());
+
+        $canPlaceOnLine = $this->canPlaceOnLine($playerId, []);
+        $args = $this->argChooseMarketCard();
+        $mustClose = !$args['canAddToLine'] && !$args['canAddToHand'];
     
         return [
-           'operations' => [], // TODO
+           'canPlaceOnLine' => $canPlaceOnLine,
+           'canClose' => intval($this->cards->countCardInLocation('line'.$playerId)) > 0,
+           'mustClose' => $mustClose,
         ];
     }
 } 

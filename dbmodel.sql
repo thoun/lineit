@@ -29,8 +29,9 @@ CREATE TABLE IF NOT EXISTS `card` (
    PRIMARY KEY (`card_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
---ALTER TABLE `player` ADD `player_jackpot_colors` JSON;
---ALTER TABLE `player` ADD `player_tokens` JSON;
+ALTER TABLE `player` ADD `player_jackpot_colors` VARCHAR(100) DEFAULT '{ "1": 0, "2": 0, "3": 0, "4": 0 }';
+ALTER TABLE `player` ADD `player_tokens` VARCHAR(100) DEFAULT '{ "-3": 0, "-4": 0, "-5": 0, "3": 0, "4": 0, "5": 0 }';
+ALTER TABLE `player` ADD `player_played_hand` smallint(1) NOT NULL DEFAULT 0;
 
 -- Example 2: add a custom field to the standard "player" table
 -- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT '0';
