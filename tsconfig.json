@@ -1,0 +1,34 @@
+{
+    "rootDir": ".", 
+    "compilerOptions": {
+      "target": "es5",
+      "module": "none",
+      "lib": ["dom", "esnext"],  
+      "sourceMap": false,
+      "outFile": "lineit.js",
+    },
+    "files": [
+        "src/framework.d.ts",
+        "src/counter.d.ts",
+        "src/lineit.d.ts",
+        "node_modules/bga-zoom/src/zoom-manager.ts",
+        "node_modules/bga-animations/src/animations/slide-animation.ts",
+        "node_modules/bga-animations/src/animations-utils.ts",
+        "node_modules/bga-animations/src/animation-manager.ts",
+        "node_modules/bga-cards/src/animations.ts",
+        "node_modules/bga-cards/src/animations-functions.ts",
+        "node_modules/bga-cards/src/stocks/card-stock.ts",
+        "node_modules/bga-cards/src/stocks/deck.ts",
+        "node_modules/bga-cards/src/stocks/line-stock.ts",
+        "node_modules/bga-cards/src/stocks/slot-stock.ts",
+        "node_modules/bga-cards/src/stocks/hidden-deck.ts",
+        "node_modules/bga-cards/src/stocks/visible-deck.ts",
+        "node_modules/bga-cards/src/stocks/all-visible-deck.ts",
+        "node_modules/bga-cards/src/card-manager.ts",
+        "src/cards.ts",
+        "src/table-center.ts",
+        "src/player-table.ts",
+        "src/lineit.ts",
+        "src/define.ts"
+    ]
+}

@@ -1,0 +1,113 @@
+.card {
+    display: inline-block;
+    position: relative;
+    width: 100px;
+    height: 152px;
+    margin: 5px;
+    border-radius: 10px;
+    font-family: 'p22_undergroundheavy';
+
+    &.disabled {
+      cursor: not-allowed;
+      filter: contrast(0.6);
+    }
+
+    .card-sides {
+        .card-side {
+            background-size: auto 100%;
+            background-image: url('img/cards.jpg');
+            border-radius: 10px;
+
+            &>* {
+                pointer-events: none;
+                user-select: none;
+            }
+
+            &.front {
+                color: white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 55pt;
+                text-align: center;
+
+                .center-number {
+                    padding-top: 10px;
+                }
+
+                .corner-number {
+                    position: absolute;
+                    width: 25px;
+                    color: white;
+                    font-size: 13pt;
+
+                    &.left {
+                        top: 5px;
+                        left: 5px;
+                    }
+
+                    &.right {
+                        top: 5px;
+                        right: 5px;
+                    }
+
+                    &.rotated {
+                        transform: rotateZ(-180deg);                        
+                        bottom: 5px;
+                        right: 5px;
+                    }
+                }
+            }
+        }
+    }    
+
+    &.selectable:not(.disabled) {
+        cursor: pointer;
+        &:not(.selected) {
+            animation: selectable-card-animation 1s alternate infinite ease-in-out;
+        }
+
+        .card-side {
+            box-shadow: unset;
+        }
+    }    
+
+    &.selected:not(.disabled) {
+        box-shadow: 0 0 5px 8px orange;
+
+        .card-side {
+            box-shadow: unset;
+        }
+    } 
+
+    &[data-type="1"] {
+        @for $color from 1 through 4 {
+            &[data-color="#{$color}"] .front {
+                background-position-x: #{($color) * 100% / 7};
+            }
+        }
+    }
+
+    &[data-type="2"] {
+        @for $number from 3 through 5 {
+            &[data-number="#{$number}"] .front {
+                background-position-x: #{($number + 2) * 100% / 7};
+            }
+        }
+    }
+
+    &[data-number="100"] .front .center-number {
+        font-size: 45pt;
+    }
+}
+
+@keyframes selectable-card-animation {
+    0% { 
+      //background: var(--background-lighter);
+      box-shadow: 0 0 3px 2px #FFFFFF;
+    }
+    100% { 
+      //background: var(--background-darker);
+      box-shadow: 0 0 5px 3px #FFFFFF;
+    }
+  }

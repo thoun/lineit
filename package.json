@@ -1,0 +1,21 @@
+{
+  "name": "lineit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lineit.js",
+  "scripts": {
+    "build:ts": "tsc",
+    "build:scss": "sass --no-source-map src/lineit.scss lineit.css"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bga-zoom": "thoun/bga-zoom",
+    "bga-animations": "thoun/bga-animations",
+    "bga-cards": "thoun/bga-cards#main"
+  },
+  "devDependencies": {
+    "sass": "^1.32.6",
+    "typescript": "^4.1.3"
+  }
+}

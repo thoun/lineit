@@ -1,0 +1,80 @@
+.player-table {
+  width: 650px;
+  position: relative;
+  background: #FFFFFF66;
+  border: 2px solid white;
+  border-radius: 15px;
+
+  .name-wrapper {
+    position: relative;
+    display: flex;
+    background: #FFFFFFAA;
+    padding: 5px;
+    justify-content: center;
+    align-items: center;
+
+    .name {
+      font-size: 20pt;
+      font-weight: bold;
+    }
+
+    .bubble-wrapper {
+      position: absolute;
+      bottom: 110%;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      pointer-events: none;
+
+      .discussion_bubble {
+        position: unset;
+        white-space: nowrap;
+        display: unset;
+        opacity: 0;
+        transition: opacity 0.5s;
+        bottom: 110%;
+  
+        &[data-visible="true"] {
+          opacity: 1;
+        }
+  
+        .bubble-score {
+          margin-top: 8px;
+        }
+  
+        &::after {
+          left: calc(50% - 15px);
+        }
+      }
+    }
+
+    .counter {
+      margin-left: 8px;
+    }
+  }
+
+  .cards {
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    min-height: 218px;
+
+    &.hand {
+      &[data-current-player="false"] {
+        min-height: 45px;
+        max-height: 45px;
+        overflow: hidden;
+
+        .card:not(:first-child) {
+          margin-left: -120px;
+        }
+      }
+
+      &[data-can-steal="true"] .card {
+        cursor: pointer;
+        animation: selectable-card-animation 1s alternate infinite ease-in-out;
+      }
+    }
+  }
+}
