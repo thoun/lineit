@@ -149,7 +149,7 @@ trait UtilTrait {
     }
 
     function playCard(int $playerId, int $id, $fromMarket = false) {
-        $args = $this->argChooseMarketCard();
+        $args = $this->argChooseMarketCard(); // TODO check add +5 from market after a +3 played from hand (same turn)
         $card = $this->array_find($args['canPlaceOnLine'], fn($c) => $c->id == $id);
         if (($card == null)  ||
             (!$fromMarket && ($card->location != 'hand' || $card->locationArg != $playerId)) ||

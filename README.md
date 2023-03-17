@@ -1,5 +1,5 @@
 # What is this project ? 
-This project is an adaptation for BoardGameArena of game Skate Legend edited by Rose Noire Edition.
+This project is an adaptation for BoardGameArena of game Line-It edited by Gigamic.
 You can play here : https://boardgamearena.com
 
 # How to install the auto-build stack

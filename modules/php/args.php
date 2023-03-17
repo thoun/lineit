@@ -37,6 +37,7 @@ trait ArgsTrait {
            'canPlaceOnLine' => $canPlaceOnLine,
            'canClose' => intval($this->cards->countCardInLocation('line'.$playerId)) > 0,
            'mustClose' => $mustClose,
+           'onlyClose' => $this->getPlayer($playerId)->playedHand, // TODO test
         ];
     }
 

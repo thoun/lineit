@@ -44,7 +44,6 @@ interface LineItGame extends Game {
     getPlayerId(): number;
     getPlayerColor(playerId: number): string;
 
-    updateTableHeight(): void;
     setTooltip(id: string, html: string): void;
     onHandCardClick(card: Card): void;
     onMarketCardClick(card: Card): void;
@@ -61,6 +60,7 @@ interface EnteringPlayCardArgs {
     canPlaceOnLine: Card[];
     canClose: boolean;
     mustClose: boolean;
+    onlyClose: boolean;
 }
 
 interface EnteringPlayHandCardArgs {

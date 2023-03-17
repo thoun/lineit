@@ -1391,7 +1391,6 @@ var LineIt = /** @class */ (function () {
         "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
     */
     LineIt.prototype.setup = function (gamedatas) {
-        var _this = this;
         log("Starting game setup");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
@@ -1410,10 +1409,6 @@ var LineIt = /** @class */ (function () {
         });
         this.setupNotifications();
         this.setupPreferences();
-        this.onScreenWidthChange = function () {
-            _this.updateTableHeight();
-            _this.onTableCenterSizeChange();
-        };
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -1452,6 +1447,9 @@ var LineIt = /** @class */ (function () {
         var _a;
         if (args.mustClose) {
             this.setGamestateDescription("Forced");
+        }
+        else if (args.onlyClose) {
+            this.setGamestateDescription("OnlyClose");
         }
         if (this.isCurrentPlayerActive()) {
             (_a = this.getCurrentPlayerTable()) === null || _a === void 0 ? void 0 : _a.setSelectable(true, args.canPlaceOnLine);
@@ -1532,24 +1530,6 @@ var LineIt = /** @class */ (function () {
         var _this = this;
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === _this.getPlayerId(); });
     };
-    LineIt.prototype.updateTableHeight = function () {
-        // setTimeout(() => document.getElementById('zoom-wrapper').style.height = `${document.getElementById('full-table').getBoundingClientRect().height}px`, 600);
-    };
-    LineIt.prototype.onTableCenterSizeChange = function () {
-        /*const maxWidth = document.getElementById('full-table').clientWidth;
-        const tableCenterWidth = document.getElementById('table-center').clientWidth + 20;
-        const playerTableWidth = 650 + 20;
-        const tablesMaxWidth = maxWidth - tableCenterWidth;
-     
-        let width = 'unset';
-        if (tablesMaxWidth < playerTableWidth * this.gamedatas.playerorder.length) {
-            const reduced = (Math.floor(tablesMaxWidth / playerTableWidth) * playerTableWidth);
-            if (reduced > 0) {
-                width = `${reduced}px`;
-            }
-        }
-        document.getElementById('tables').style.width = width;*/
-    };
     LineIt.prototype.setupPreferences = function () {
         var _this = this;
         // Extract the ID and value from the UI control
@@ -1601,6 +1581,7 @@ var LineIt = /** @class */ (function () {
             }
         });
         this.setTooltipToClass('playerhand-counter', _('Number of cards in hand'));
+        this.setTooltipToClass('scored-counter', _('Number of cards in the score pile'));
     };
     LineIt.prototype.createPlayerTables = function (gamedatas) {
         var _this = this;

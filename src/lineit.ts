@@ -66,11 +66,6 @@ class LineIt implements LineItGame {
         this.setupNotifications();
         this.setupPreferences();
 
-        (this as any).onScreenWidthChange = () => {
-            this.updateTableHeight();
-            this.onTableCenterSizeChange();
-        };
-
         log( "Ending game setup" );
     }
 
@@ -112,6 +107,8 @@ class LineIt implements LineItGame {
     private onEnteringPlayCard(args: EnteringPlayCardArgs) {
         if (args.mustClose) {
             this.setGamestateDescription(`Forced`);
+        } else if (args.onlyClose) {
+            this.setGamestateDescription(`OnlyClose`);
         }
         
         if ((this as any).isCurrentPlayerActive()) {
@@ -204,26 +201,6 @@ class LineIt implements LineItGame {
         return this.playersTables.find(playerTable => playerTable.playerId === this.getPlayerId());
     }
 
-    public updateTableHeight() {
-        // setTimeout(() => document.getElementById('zoom-wrapper').style.height = `${document.getElementById('full-table').getBoundingClientRect().height}px`, 600);
-    }
-
-    private onTableCenterSizeChange() {
-        /*const maxWidth = document.getElementById('full-table').clientWidth;
-        const tableCenterWidth = document.getElementById('table-center').clientWidth + 20;
-        const playerTableWidth = 650 + 20;
-        const tablesMaxWidth = maxWidth - tableCenterWidth;
-     
-        let width = 'unset';
-        if (tablesMaxWidth < playerTableWidth * this.gamedatas.playerorder.length) {
-            const reduced = (Math.floor(tablesMaxWidth / playerTableWidth) * playerTableWidth);
-            if (reduced > 0) {
-                width = `${reduced}px`;
-            }
-        }
-        document.getElementById('tables').style.width = width;*/
-    }
-
     private setupPreferences() {
         // Extract the ID and value from the UI control
         const onchange = (e) => {
@@ -299,6 +276,7 @@ class LineIt implements LineItGame {
         });
 
         this.setTooltipToClass('playerhand-counter', _('Number of cards in hand'));
+        this.setTooltipToClass('scored-counter', _('Number of cards in the score pile'));
     }
 
     private createPlayerTables(gamedatas: LineItGamedatas) {
