@@ -58,37 +58,35 @@ html, .mode_3d #game_play_area_background {
       background-position: 82% 94%;
     }
   }
+}
 
-  #full-table {
+#tables-and-center {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 20px;
+  flex-direction: column;
+
+  #tables {
     position: relative;
-    transform-origin: left top;
-
-    #centered-table {
-      display: flex;
-      justify-content: center;
-    }
-
-    #tables-and-center {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: start;
-      gap: 20px;
-
-      #tables {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 20px;
-      }
-    }
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    flex-direction: column;
   }
 }
 
-@media (max-width: 1165px) { 
+@media (min-width: 1500px) { 
   #tables-and-center {
-    flex-wrap: wrap;
+    flex-direction: row-reverse;
+    justify-content: center;
+    align-items: start;
+
+    &>div {
+      flex: 1
+    }
   }
 }

@@ -58,6 +58,9 @@ class LineIt implements LineItGame {
         this.zoomManager = new ZoomManager({
             element: document.getElementById('table'),
             smooth: false,
+            zoomControls: {
+                color: 'white',
+            },
             localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
             /*autoZoom: {
                 expectedWidth: this.factories.getWidth(),
@@ -367,6 +370,10 @@ class LineIt implements LineItGame {
     private createPlayerTable(gamedatas: LineItGamedatas, playerId: number) {
         const table = new PlayerTable(this, gamedatas.players[playerId]);
         this.playersTables.push(table);
+    }
+
+    public onMarketCardClick(card: Card): void {
+        // TODO
     }
     
     public onCardClick(card: Card): void {

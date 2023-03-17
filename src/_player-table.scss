@@ -1,80 +1,49 @@
 .player-table {
-  width: 650px;
+  font-family: 'p22_undergroundheavy';
+  width: 100%;
   position: relative;
-  background: #FFFFFF66;
-  border: 2px solid white;
+  background: #FFFFFF33;
+  box-shadow: 0 0 5px 2px var(--player-color);
   border-radius: 15px;
+  margin: 5px;
+  font-size: 16pt;
+  color: white;
 
   .name-wrapper {
+    color: var(--player-color);
     position: relative;
     display: flex;
-    background: #FFFFFFAA;
+    background: #FFFFFF88;
     padding: 5px;
+    //border-radius: 15px 15px 0 0;
+    border-radius: 15px;
     justify-content: center;
     align-items: center;
+    font-size: 20pt;
+  }
 
-    .name {
-      font-size: 20pt;
-      font-weight: bold;
+  .hand-wrapper {
+    display: flex;
+    margin: 5px;
+    background: #FFFFFF88;
+    border-radius: 10px;
+
+    .your-hand {
+      text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black, 0 0 4px black;
+      text-align: center;
+      writing-mode: vertical-lr;
+      transform: rotate(180deg);
+      //color: white;
+      padding: 5px;
+      text-overflow: ellipsis;
     }
 
-    .bubble-wrapper {
-      position: absolute;
-      bottom: 110%;
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      pointer-events: none;
-
-      .discussion_bubble {
-        position: unset;
-        white-space: nowrap;
-        display: unset;
-        opacity: 0;
-        transition: opacity 0.5s;
-        bottom: 110%;
-  
-        &[data-visible="true"] {
-          opacity: 1;
-        }
-  
-        .bubble-score {
-          margin-top: 8px;
-        }
-  
-        &::after {
-          left: calc(50% - 15px);
-        }
-      }
-    }
-
-    .counter {
-      margin-left: 8px;
+    .hand {
+      flex: 1;
     }
   }
 
   .cards {
-
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    min-height: 218px;
-
-    &.hand {
-      &[data-current-player="false"] {
-        min-height: 45px;
-        max-height: 45px;
-        overflow: hidden;
-
-        .card:not(:first-child) {
-          margin-left: -120px;
-        }
-      }
-
-      &[data-can-steal="true"] .card {
-        cursor: pointer;
-        animation: selectable-card-animation 1s alternate infinite ease-in-out;
-      }
-    }
+    min-height: 152px;
   }
 }

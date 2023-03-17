@@ -342,6 +342,7 @@ body > .card {
   }
 }
 #table-center {
+  font-family: "p22_undergroundheavy";
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -351,6 +352,9 @@ body > .card {
   border-radius: 15px;
   background: rgba(101, 82, 145, 0.4);
   min-width: 505px;
+  margin: 5px;
+  color: white;
+  font-size: 16pt;
 }
 
 .player-board {
@@ -380,69 +384,46 @@ body > .card {
 }
 
 .player-table {
-  width: 650px;
+  font-family: "p22_undergroundheavy";
+  width: 100%;
   position: relative;
-  background: rgba(255, 255, 255, 0.4);
-  border: 2px solid white;
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 5px 2px var(--player-color);
   border-radius: 15px;
+  margin: 5px;
+  font-size: 16pt;
+  color: white;
 }
 .player-table .name-wrapper {
+  color: var(--player-color);
   position: relative;
   display: flex;
-  background: rgba(255, 255, 255, 0.6666666667);
+  background: rgba(255, 255, 255, 0.5333333333);
   padding: 5px;
+  border-radius: 15px;
   justify-content: center;
   align-items: center;
-}
-.player-table .name-wrapper .name {
   font-size: 20pt;
-  font-weight: bold;
 }
-.player-table .name-wrapper .bubble-wrapper {
-  position: absolute;
-  bottom: 110%;
+.player-table .hand-wrapper {
   display: flex;
-  justify-content: center;
-  width: 100%;
-  pointer-events: none;
+  margin: 5px;
+  background: rgba(255, 255, 255, 0.5333333333);
+  border-radius: 10px;
 }
-.player-table .name-wrapper .bubble-wrapper .discussion_bubble {
-  position: unset;
-  white-space: nowrap;
-  display: unset;
-  opacity: 0;
-  transition: opacity 0.5s;
-  bottom: 110%;
+.player-table .hand-wrapper .your-hand {
+  text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black, 0 0 4px black;
+  text-align: center;
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  padding: 5px;
+  text-overflow: ellipsis;
 }
-.player-table .name-wrapper .bubble-wrapper .discussion_bubble[data-visible=true] {
-  opacity: 1;
-}
-.player-table .name-wrapper .bubble-wrapper .discussion_bubble .bubble-score {
-  margin-top: 8px;
-}
-.player-table .name-wrapper .bubble-wrapper .discussion_bubble::after {
-  left: calc(50% - 15px);
-}
-.player-table .name-wrapper .counter {
-  margin-left: 8px;
+.player-table .hand-wrapper .hand {
+  flex: 1;
 }
 .player-table .cards {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  min-height: 218px;
-}
-.player-table .cards.hand[data-current-player=false] {
-  min-height: 45px;
-  max-height: 45px;
-  overflow: hidden;
-}
-.player-table .cards.hand[data-current-player=false] .card:not(:first-child) {
-  margin-left: -120px;
-}
-.player-table .cards.hand[data-can-steal=true] .card {
-  cursor: pointer;
-  animation: selectable-card-animation 1s alternate infinite ease-in-out;
+  min-height: 152px;
 }
 
 @font-face {
@@ -490,32 +471,32 @@ html, .mode_3d #game_play_area_background {
 #zoom-wrapper #zoom-controls #zoom-out {
   background-position: 82% 94%;
 }
-#zoom-wrapper #full-table {
-  position: relative;
-  transform-origin: left top;
-}
-#zoom-wrapper #full-table #centered-table {
-  display: flex;
-  justify-content: center;
-}
-#zoom-wrapper #full-table #tables-and-center {
+
+#tables-and-center {
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: start;
+  align-items: stretch;
   gap: 20px;
+  flex-direction: column;
 }
-#zoom-wrapper #full-table #tables-and-center #tables {
+#tables-and-center #tables {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   gap: 20px;
+  flex-direction: column;
 }
 
-@media (max-width: 1165px) {
+@media (min-width: 1500px) {
   #tables-and-center {
-    flex-wrap: wrap;
+    flex-direction: row-reverse;
+    justify-content: center;
+    align-items: start;
+  }
+  #tables-and-center > div {
+    flex: 1;
   }
 }

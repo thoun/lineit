@@ -1,4 +1,5 @@
 #table-center {
+    font-family: 'p22_undergroundheavy';
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -8,4 +9,7 @@
     border-radius: 15px;
     background: #65529166;
     min-width: 505px;
+    margin: 5px;
+    color: white;
+    font-size: 16pt;
 }

@@ -1234,6 +1234,7 @@ var TableCenter = /** @class */ (function () {
     function TableCenter(game, gamedatas) {
         var _this = this;
         this.game = game;
+        document.getElementById("market-title").innerHTML = _('Market');
         this.market = new LineStock(this.game.cardsManager, document.getElementById("market"));
         this.market.onCardClick = function (card) { return _this.game.onMarketCardClick(card); };
         this.market.addCards(gamedatas.market);
@@ -1245,138 +1246,24 @@ var isDebug = window.location.host == 'studio.boardgamearena.com' || window.loca
 var log = isDebug ? console.log.bind(window.console) : function () { };
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
+        var _this = this;
         this.game = game;
-        /*this.playerId = Number(player.id);
+        this.playerId = Number(player.id);
         this.currentPlayer = this.playerId == this.game.getPlayerId();
-
-        let html = `
-        <div id="player-table-${this.playerId}" class="player-table">
-            <div id="player-table-${this.playerId}-hand-cards" class="hand cards" data-player-id="${this.playerId}" data-current-player="${this.currentPlayer.toString()}" data-my-hand="${this.currentPlayer.toString()}"></div>
-            <div class="name-wrapper">
-                <span class="name" style="color: #${player.color};">${player.name}</span>
-                <div class="bubble-wrapper">
-                    <div id="player-table-${this.playerId}-discussion-bubble" class="discussion_bubble" data-visible="false"></div>
-                </div>
-        `;
+        var html = "\n        <div id=\"player-table-".concat(this.playerId, "\" class=\"player-table\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"name-wrapper\">").concat(player.name, "</div>\n        ");
         if (this.currentPlayer) {
-            html += `<span class="counter">
-                    (${_('Cards points:')}&nbsp;<span id="cards-points-counter"></span>)
-                </span>`;
+            html += "\n            <div class=\"hand-wrapper\">\n                <div class=\"your-hand\">".concat(_('Your hand'), "</div>\n                <div id=\"player-table-").concat(this.playerId, "-hand\" class=\"hand cards\"></div>\n            </div>");
         }
-        html += `</div>
-            <div id="player-table-${this.playerId}-table-cards" class="table cards">
-            </div>
-        </div>
-        `;
+        html += "\n            <div id=\"player-table-".concat(this.playerId, "-line\" class=\"line cards\"></div>\n        </div>\n        ");
         dojo.place(html, document.getElementById('tables'));
-
         if (this.currentPlayer) {
-            this.cardsPointsCounter = new ebg.counter();
-            this.cardsPointsCounter.create(`cards-points-counter`);
-            this.cardsPointsCounter.setValue(player.cardsPoints);
+            this.hand = new LineStock(this.game.cardsManager, document.getElementById("player-table-".concat(this.playerId, "-hand")));
+            this.hand.onCardClick = function (card) { return _this.game.onHandCardClick(card); };
+            this.hand.addCards(player.hand);
         }
-
-        this.addCardsToHand(player.handCards);
-        this.addCardsToTable(player.tableCards);
-
-        if (player.endCall) {
-            const args = {
-                announcement: player.endCall.announcement,
-                result: player.endCall.betResult,
-            };
-            (this.game as any).format_string_recursive('log', args);
-            this.showAnnouncement(args.announcement);
-            this.showAnnouncementPoints(player.endCall.cardsPoints);
-            if (player.endCall.betResult) {
-                this.showAnnouncementBetResult(args.result);
-            }
-        } else if (player.endRoundPoints) {
-            this.showAnnouncementPoints(player.endRoundPoints.cardsPoints);
-        }
-        if (player.scoringDetail) {
-            this.showScoreDetails(player.scoringDetail);
-        }*/
+        this.line = new LineStock(this.game.cardsManager, document.getElementById("player-table-".concat(this.playerId, "-line")));
+        this.line.addCards(player.line);
     }
-    Object.defineProperty(PlayerTable.prototype, "handCardsDiv", {
-        get: function () {
-            return document.getElementById("player-table-".concat(this.playerId, "-hand-cards"));
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Object.defineProperty(PlayerTable.prototype, "tableCardsDiv", {
-        get: function () {
-            return document.getElementById("player-table-".concat(this.playerId, "-table-cards"));
-        },
-        enumerable: false,
-        configurable: true
-    });
-    PlayerTable.prototype.addCardsToHand = function (cards, from) {
-        this.addCards(cards, 'hand', from);
-    };
-    PlayerTable.prototype.addCardsToTable = function (cards, from) {
-        this.addCards(cards, 'table', from);
-    };
-    PlayerTable.prototype.cleanTable = function () {
-        /*const cards = [
-            ...Array.from(this.handCardsDiv.getElementsByClassName('card')) as HTMLDivElement[],
-            ...Array.from(this.tableCardsDiv.getElementsByClassName('card')) as HTMLDivElement[],
-        ];
-        
-        cards.forEach(cardDiv => this.game.cards.createMoveOrUpdateCard({
-            id: Number(cardDiv.dataset.id),
-        } as any, `deck`));
-
-        setTimeout(() => cards.forEach(cardDiv => this.game.cards.removeCard(cardDiv)), 500);
-        this.game.updateTableHeight();*/
-    };
-    PlayerTable.prototype.setHandPoints = function (cardsPoints) {
-        this.cardsPointsCounter.toValue(cardsPoints);
-    };
-    PlayerTable.prototype.setSelectable = function (selectable) {
-        var cards = Array.from(this.handCardsDiv.getElementsByClassName('card'));
-        if (selectable) {
-            cards.forEach(function (card) { return card.classList.add('selectable'); });
-        }
-        else {
-            cards.forEach(function (card) { return card.classList.remove('selectable', 'selected', 'disabled'); });
-        }
-    };
-    PlayerTable.prototype.updateDisabledPlayCards = function (selectedCards, playableDuoCardFamilies) {
-        if (!this.game.isCurrentPlayerActive()) {
-            return;
-        }
-        var cards = Array.from(this.handCardsDiv.getElementsByClassName('card'));
-        cards.forEach(function (card) {
-            var disabled = false;
-            if (card.dataset.category != '2') {
-                disabled = true;
-            }
-            else {
-                if (playableDuoCardFamilies.includes(Number(card.dataset.family))) {
-                    if (selectedCards.length >= 2) {
-                        disabled = !selectedCards.includes(Number(card.dataset.id));
-                    }
-                    else if (selectedCards.length == 1) {
-                        var family = Number(document.getElementById("card-".concat(selectedCards[0])).dataset.family);
-                        var authorizedFamily = '' + (family >= 4 ? 9 - family : family);
-                        disabled = Number(card.dataset.id) != selectedCards[0] && card.dataset.family != authorizedFamily;
-                    }
-                }
-                else {
-                    disabled = true;
-                }
-            }
-            card.classList.toggle('disabled', disabled);
-        });
-    };
-    PlayerTable.prototype.addCards = function (cards, to, from) {
-        /*cards.forEach(card => {
-            this.game.cards.createMoveOrUpdateCard(card, `player-table-${this.playerId}-${to}-cards`, false, from);
-            document.getElementById(`card-${card.id}`).style.order = ''+(CATEGORY_ORDER[card.category]*100 + card.family * 10 + card.color);
-        });
-        this.game.updateTableHeight();*/
-    };
     return PlayerTable;
 }());
 var ANIMATION_MS = 500;
@@ -1416,6 +1303,9 @@ var LineIt = /** @class */ (function () {
         this.zoomManager = new ZoomManager({
             element: document.getElementById('table'),
             smooth: false,
+            zoomControls: {
+                color: 'white',
+            },
             localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
             /*autoZoom: {
                 expectedWidth: this.factories.getWidth(),
@@ -1684,6 +1574,9 @@ var LineIt = /** @class */ (function () {
     LineIt.prototype.createPlayerTable = function (gamedatas, playerId) {
         var table = new PlayerTable(this, gamedatas.players[playerId]);
         this.playersTables.push(table);
+    };
+    LineIt.prototype.onMarketCardClick = function (card) {
+        // TODO
     };
     LineIt.prototype.onCardClick = function (card) {
         var cardDiv = document.getElementById("card-".concat(card.id));

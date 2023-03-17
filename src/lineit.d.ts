@@ -43,8 +43,8 @@ interface LineItGame extends Game {
 
     updateTableHeight(): void;
     setTooltip(id: string, html: string): void;
-    playCardFromHand(id: number): void;
-    playCardFromDeck(number: number): void;
+    onHandCardClick(card: Card): void;
+    onMarketCardClick(card: Card): void;
 }
 
 interface EnteringChooseContinueArgs {
