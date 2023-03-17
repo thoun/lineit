@@ -144,6 +144,7 @@ class LineIt extends Table {
             $player['line'] = $this->getCardsByLocation('line'.$playerId);
         }
 
+        $result['firstPlayerId'] = $this->getGameStateValue(FIRST_PLAYER);
         $result['market'] = $this->getCardsByLocation('market');
         $jackpots = [];
         for ($i = 1; $i <= 4; $i++) {

@@ -1234,11 +1234,51 @@ var TableCenter = /** @class */ (function () {
     function TableCenter(game, gamedatas) {
         var _this = this;
         this.game = game;
+        this.jackpotCounters = [];
+        document.getElementById("deck").dataset.count = "".concat(gamedatas.deck);
+        this.deckCounter = new ebg.counter();
+        this.deckCounter.create("deck-counter");
+        this.deckCounter.setValue(gamedatas.deck);
+        var html = "";
+        for (var i = 1; i <= 4; i++) {
+            html += "\n            <div id=\"jackpot".concat(i, "\" class=\"deck\" data-count=\"").concat(gamedatas.jackpots[i].length, "\">\n                <div class=\"jackpot-token\" data-color=\"").concat(i, "\"></div>\n                <span id=\"jackpot").concat(i, "-counter\" class=\"deck-counter\"></span>\n            </div>\n            ");
+        }
+        document.getElementById("decks").insertAdjacentHTML('beforeend', html);
+        for (var i = 1; i <= 4; i++) {
+            this.jackpotCounters[i] = new ebg.counter();
+            this.jackpotCounters[i].create("jackpot".concat(i, "-counter"));
+            this.jackpotCounters[i].setValue(gamedatas.jackpots[i].length);
+        }
         document.getElementById("market-title").innerHTML = _('Market');
         this.market = new LineStock(this.game.cardsManager, document.getElementById("market"));
         this.market.onCardClick = function (card) { return _this.game.onMarketCardClick(card); };
         this.market.addCards(gamedatas.market);
     }
+    TableCenter.prototype.setSelectable = function (selectable, selectableCards) {
+        var _this = this;
+        if (selectableCards === void 0) { selectableCards = null; }
+        this.market.setSelectionMode(selectable ? 'single' : 'none');
+        this.market.getCards().forEach(function (card) {
+            var element = _this.market.getCardElement(card);
+            var disabled = selectable && selectableCards != null && !selectableCards.some(function (s) { return s.id == card.id; });
+            element.classList.toggle('disabled', disabled);
+            element.classList.toggle('selectable', !disabled);
+        });
+    };
+    TableCenter.prototype.newMarket = function (cards) {
+        this.market.removeAll();
+        this.market.addCards(cards, {
+            originalSide: 'back'
+        }, undefined, 50);
+    };
+    TableCenter.prototype.setDeck = function (deck) {
+        this.deckCounter.toValue(deck);
+        document.getElementById("deck").dataset.count = "".concat(deck);
+    };
+    TableCenter.prototype.setJackpot = function (color, count) {
+        this.jackpotCounters[color].toValue(count);
+        document.getElementById("jackpot".concat(color)).dataset.count = "".concat(count);
+    };
     return TableCenter;
 }());
 var isDebug = window.location.host == 'studio.boardgamearena.com' || window.location.hash.indexOf('debug') > -1;
@@ -1274,10 +1314,6 @@ var LineIt = /** @class */ (function () {
         this.playersTables = [];
         this.handCounters = [];
         this.TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
-        /*const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
-        if (zoomStr) {
-            this.zoom = Number(zoomStr);
-        }*/
     }
     /*
         setup:
@@ -1297,6 +1333,7 @@ var LineIt = /** @class */ (function () {
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
         this.cardsManager = new CardsManager(this);
+        this.animationManager = new AnimationManager(this);
         this.tableCenter = new TableCenter(this, gamedatas);
         this.createPlayerPanels(gamedatas);
         this.createPlayerTables(gamedatas);
@@ -1307,14 +1344,7 @@ var LineIt = /** @class */ (function () {
                 color: 'white',
             },
             localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
-            /*autoZoom: {
-                expectedWidth: this.factories.getWidth(),
-            },*/
-            // onDimensionsChange: (newZoom) => this.onTableCenterSizeChange(newZoom),
         });
-        this.deckCounter = new ebg.counter();
-        this.deckCounter.create("deck-counter");
-        this.deckCounter.setValue(this.gamedatas.deck);
         this.setupNotifications();
         this.setupPreferences();
         this.onScreenWidthChange = function () {
@@ -1331,13 +1361,13 @@ var LineIt = /** @class */ (function () {
     LineIt.prototype.onEnteringState = function (stateName, args) {
         log('Entering state: ' + stateName, args.args);
         switch (stateName) {
-            case 'takeCards':
-                this.onEnteringTakeCards(args);
+            case 'chooseMarketCard':
+                this.onEnteringChooseMarketCard(args.args);
                 break;
-            /*case 'chooseCard':
-                this.onEnteringChooseCard(args.args);
+            case 'playCard':
+                this.onEnteringPlayCard(args.args);
                 break;
-            case 'putDiscardPile':
+            /*case 'putDiscardPile':
                 this.onEnteringPutDiscardPile(args.args);
                 break;
             case 'playCards':
@@ -1361,85 +1391,23 @@ var LineIt = /** @class */ (function () {
         this.gamedatas.gamestate.descriptionmyturn = "".concat(originalState['descriptionmyturn' + property]);
         this.updatePageTitle();
     };
-    LineIt.prototype.onEnteringTakeCards = function (argsRoot) {
-        var args = argsRoot.args;
-        /*if (!args.canTakeFromDiscard.length) {
-            this.setGamestateDescription('NoDiscard');
-        }*/
+    LineIt.prototype.onEnteringChooseMarketCard = function (args) {
         if (this.isCurrentPlayerActive()) {
-            //this.stacks.makeDeckSelectable(args.canTakeFromDeck);
-            //this.stacks.makeDiscardSelectable(true);
+            this.selectedCardId = null;
+            this.tableCenter.setSelectable(true, args.canAddToHand ? null : args.canPlaceOnLine);
         }
     };
-    /*private onEnteringChooseCard(args: EnteringChooseCardArgs) {
-        this.stacks.showPickCards(true, args._private?.cards ?? args.cards);
-        if ((this as any).isCurrentPlayerActive()) {
-            setTimeout(() => this.stacks.makePickSelectable(true), 500);
-        } else {
-            this.stacks.makePickSelectable(false);
+    LineIt.prototype.onEnteringPlayCard = function (args) {
+        if (args.mustClose) {
+            this.setGamestateDescription("Forced");
         }
-        this.stacks.setDeckCount(args.remainingCardsInDeck);
-    }
-    
-    private onEnteringPutDiscardPile(args: EnteringChooseCardArgs) {
-        this.stacks.showPickCards(true, args._private?.cards ?? args.cards);
-        this.stacks.makeDiscardSelectable((this as any).isCurrentPlayerActive());
-    }
-
-    private onEnteringPlayCards() {
-        this.stacks.showPickCards(false);
-        this.selectedCards = [];
-
-        this.updateDisabledPlayCards();
-    }
-    
-    private onEnteringChooseDiscardPile() {
-        this.stacks.makeDiscardSelectable((this as any).isCurrentPlayerActive());
-    }
-    
-    private onEnteringChooseDiscardCard(args: EnteringChooseCardArgs) {
-        const cards = args._private?.cards || args.cards;
-        const pickDiv = document.getElementById('discard-pick');
-        pickDiv.innerHTML = '';
-        pickDiv.dataset.visible = 'true';
-
-        cards?.forEach(card => {
-            this.cards.createMoveOrUpdateCard(card, `discard-pick`, false, 'discard'+args.discardNumber);
-            if ((this as any).isCurrentPlayerActive()) {
-                document.getElementById(`card-${card.id}`).classList.add('selectable');
-            }
-        });
-
-        this.updateTableHeight();
-    }
-    
-    private onEnteringChooseOpponent(args: EnteringChooseOpponentArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
-            args.playersIds.forEach(playerId =>
-                document.getElementById(`player-table-${playerId}-hand-cards`).dataset.canSteal = 'true'
-            );
-        }
-    }*/
+    };
     LineIt.prototype.onLeavingState = function (stateName) {
         log('Leaving state: ' + stateName);
         switch (stateName) {
-            /* case 'takeCards':
-                 this.onLeavingTakeCards();
-                 break;
-             case 'chooseCard':
-                 this.onLeavingChooseCard();
-                 break;
-             case 'putDiscardPile':
-                 this.onLeavingPutDiscardPile();
-                 break;
-             case 'playCards':
-                 this.onLeavingPlayCards();
-                 break;
-             case 'chooseDiscardCard':
-                 this.onLeavingChooseDiscardCard();
-                 break;*/
-            case 'chooseOpponent':
-                this.onLeavingChooseOpponent();
+            case 'chooseMarketCard':
+                this.selectedCardId = null;
+                this.tableCenter.setSelectable(false);
                 break;
         }
     };
@@ -1476,10 +1444,22 @@ var LineIt = /** @class */ (function () {
         var _this = this;
         if (this.isCurrentPlayerActive()) {
             switch (stateName) {
-                case 'chooseContinue':
-                    var chooseContinueArgs_1 = args;
-                    this.addActionButton("continue_button", _("Continue"), function () { return _this.continue(); });
-                    this.addActionButton("stop_button", _("Stop"), function () { return _this.stop(chooseContinueArgs_1.shouldNotStop); });
+                case 'chooseMarketCard':
+                    this.selectedCardId = null;
+                    this.addActionButton("addLine_button", _("Add selected card to line"), function () { return _this.chooseMarketCardLine(); });
+                    this.addActionButton("addHand_button", _("Add selected card to hand"), function () { return _this.chooseMarketCardHand(); });
+                    ["addLine_button", "addHand_button"].forEach(function (id) { return document.getElementById(id).classList.add('disabled'); });
+                    break;
+                case 'playCard':
+                    var playCardArgs = args;
+                    this.addActionButton("closeLine_button", _("Close the line"), function () { return _this.closeLine(); }, null, null, 'red');
+                    this.addActionButton("pass_button", _("Pass"), function () { return _this.pass(); });
+                    if (!playCardArgs.canClose) {
+                        document.getElementById("closeLine_button").classList.add('disabled');
+                    }
+                    if (playCardArgs.mustClose) {
+                        document.getElementById("pass_button").classList.add('disabled');
+                    }
                     break;
             }
         }
@@ -1561,6 +1541,11 @@ var LineIt = /** @class */ (function () {
             handCounter.create("playerhand-counter-".concat(playerId));
             handCounter.setValue(player.hand.length);
             _this.handCounters[playerId] = handCounter;
+            // first player
+            dojo.place("<div id=\"first-player-token-wrapper-".concat(player.id, "\" class=\"first-player-token-wrapper\"></div>"), "player_board_".concat(player.id));
+            if (gamedatas.firstPlayerId == playerId) {
+                dojo.place("<div id=\"first-player-token\" class=\"first-player-token\"></div>", "first-player-token-wrapper-".concat(player.id));
+            }
         });
         this.setTooltipToClass('playerhand-counter', _('Number of cards in hand'));
     };
@@ -1576,68 +1561,16 @@ var LineIt = /** @class */ (function () {
         this.playersTables.push(table);
     };
     LineIt.prototype.onMarketCardClick = function (card) {
-        // TODO
-    };
-    LineIt.prototype.onCardClick = function (card) {
-        var cardDiv = document.getElementById("card-".concat(card.id));
-        var parentDiv = cardDiv.parentElement;
-        if (cardDiv.classList.contains('disabled')) {
+        var args = this.gamedatas.gamestate.args;
+        if (!args.canAddToHand && !args.canPlaceOnLine.some(function (s) { return s.id == card.id; })) {
             return;
         }
-        /*switch (this.gamedatas.gamestate.name) {
-            case 'takeCards':
-                if (parentDiv.dataset.discard) {
-                    this.takeCardFromDiscard(Number(parentDiv.dataset.discard));
-                }
-                break;
-            case 'chooseCard':
-                if (parentDiv.id == 'pick') {
-                    this.chooseCard(card.id);
-                }
-                break;
-            case 'playCards':
-                if (parentDiv.dataset.myHand == `true`) {
-                    if (this.selectedCards.includes(card.id)) {
-                        this.selectedCards.splice(this.selectedCards.indexOf(card.id), 1);
-                        cardDiv.classList.remove('selected');
-                    } else {
-                        this.selectedCards.push(card.id);
-                        cardDiv.classList.add('selected');
-                    }
-                    this.updateDisabledPlayCards();
-                }
-                break;
-            case 'chooseDiscardCard':
-                if (parentDiv.id == 'discard-pick') {
-                    this.chooseDiscardCard(card.id);
-                }
-                break;
-            case 'chooseOpponent':
-                const chooseOpponentArgs = this.gamedatas.gamestate.args as EnteringChooseContinueArgs;
-                if (parentDiv.dataset.currentPlayer == 'false') {
-                    const stealPlayerId = Number(parentDiv.dataset.playerId);
-                    if (chooseOpponentArgs.playersIds.includes(stealPlayerId)) {
-                        this.chooseOpponent(stealPlayerId);
-                    }
-                }
-                break;
-        }*/
+        this.selectedCardId = card.id;
+        document.getElementById("addLine_button").classList.toggle('disabled', !(args.canAddToLine && args.canPlaceOnLine.some(function (s) { return s.id == card.id; })));
+        document.getElementById("addHand_button").classList.toggle('disabled', !args.canAddToHand);
     };
-    LineIt.prototype.continue = function () {
-        if (!this.checkAction('continue')) {
-            return;
-        }
-        this.takeAction('continue');
-    };
-    LineIt.prototype.stop = function (warning) {
-        var _this = this;
-        if (!this.checkAction('stop')) {
-            return;
-        }
-        if (warning) {
-            this.confirmationDialog(_("Are you sure you want to stop here? There is no risk if you continue the sequence."), function () { return _this.stop(false); });
-        }
-        this.takeAction('stop');
+    LineIt.prototype.onHandCardClick = function (card) {
+        this.playCardFromHand(card.id);
     };
     LineIt.prototype.playCardFromHand = function (id) {
         if (!this.checkAction('playCardFromHand')) {
@@ -1647,13 +1580,33 @@ var LineIt = /** @class */ (function () {
             id: id
         });
     };
-    LineIt.prototype.playCardFromDeck = function (number) {
-        if (!this.checkAction('playCardFromDeck')) {
+    LineIt.prototype.chooseMarketCardLine = function () {
+        if (!this.checkAction('chooseMarketCardLine')) {
             return;
         }
-        this.takeAction('playCardFromDeck', {
-            number: number
+        this.takeAction('chooseMarketCardLine', {
+            id: this.selectedCardId,
         });
+    };
+    LineIt.prototype.chooseMarketCardHand = function () {
+        if (!this.checkAction('chooseMarketCardHand')) {
+            return;
+        }
+        this.takeAction('chooseMarketCardHand', {
+            id: this.selectedCardId,
+        });
+    };
+    LineIt.prototype.closeLine = function () {
+        if (!this.checkAction('closeLine')) {
+            return;
+        }
+        this.takeAction('closeLine');
+    };
+    LineIt.prototype.pass = function () {
+        if (!this.checkAction('pass')) {
+            return;
+        }
+        this.takeAction('pass');
     };
     LineIt.prototype.takeAction = function (action, data) {
         data = data || {};
@@ -1673,61 +1626,69 @@ var LineIt = /** @class */ (function () {
     */
     LineIt.prototype.setupNotifications = function () {
         //log( 'notifications subscriptions setup' );
+        var _this = this;
         var notifs = [
-            ['cardInDiscardFromDeck', ANIMATION_MS],
-            ['cardInHandFromDiscard', ANIMATION_MS],
-            ['cardInHandFromDiscardCrab', ANIMATION_MS],
-            ['cardInHandFromPick', ANIMATION_MS],
-            ['cardInHandFromDeck', ANIMATION_MS],
-            ['cardInDiscardFromPick', ANIMATION_MS],
-            ['playCards', ANIMATION_MS],
-            ['stealCard', ANIMATION_MS],
-            ['revealHand', ANIMATION_MS * 2],
-            ['announceEndRound', ANIMATION_MS * 2],
-            ['betResult', ANIMATION_MS * 2],
-            ['endRound', ANIMATION_MS * 2],
-            ['score', ANIMATION_MS * 3],
-            ['newRound', 1],
-            ['updateCardsPoints', 1],
-            ['emptyDeck', 1],
+            ['newMarket', ANIMATION_MS],
+            ['chooseMarketCardHand', ANIMATION_MS],
+            ['jackpotRemaining', 100],
+            ['discardRemaining', 100],
+            ['newFirstPlayer', ANIMATION_MS],
+            ['playCard', ANIMATION_MS],
+            ['applyJackpot', ANIMATION_MS],
+            ['betResult', ANIMATION_MS],
+            ['closeLine', ANIMATION_MS],
         ];
-        /*notifs.forEach((notif) => {
-            dojo.subscribe(notif[0], this, `notif_${notif[0]}`);
-            (this as any).notifqueue.setSynchronous(notif[0], notif[1]);
+        notifs.forEach(function (notif) {
+            dojo.subscribe(notif[0], _this, "notif_".concat(notif[0]));
+            _this.notifqueue.setSynchronous(notif[0], notif[1]);
         });
-
-        (this as any).notifqueue.setIgnoreNotificationCheck('cardInHandFromPick', (notif: Notif<NotifCardInHandFromPickArgs>) =>
-            notif.args.playerId == this.getPlayerId() && !notif.args.card.category
-        );
-        (this as any).notifqueue.setIgnoreNotificationCheck('cardInHandFromDeck', (notif: Notif<NotifCardInHandFromPickArgs>) =>
-            notif.args.playerId == this.getPlayerId() && !notif.args.card.category
-        );
-        (this as any).notifqueue.setIgnoreNotificationCheck('cardInHandFromDiscardCrab', (notif: Notif<NotifCardInHandFromDiscardArgs>) =>
-            notif.args.playerId == this.getPlayerId() && !notif.args.card.category
-        );
-        (this as any).notifqueue.setIgnoreNotificationCheck('stealCard', (notif: Notif<NotifStealCardArgs>) =>
-            [notif.args.playerId, notif.args.opponentId].includes(this.getPlayerId()) && !(notif.args as any).cardName
-        );*/
+    };
+    LineIt.prototype.notif_newMarket = function (notif) {
+        this.tableCenter.newMarket(notif.args.cards);
+        this.tableCenter.setDeck(notif.args.deck);
+    };
+    LineIt.prototype.notif_chooseMarketCardHand = function (notif) {
+        if (notif.args.playerId == this.getPlayerId()) {
+            this.getPlayerTable(notif.args.playerId).hand.addCard(notif.args.card);
+        }
+        else {
+            this.tableCenter.market.removeCard(notif.args.card);
+        }
+    };
+    LineIt.prototype.notif_jackpotRemaining = function (notif) {
+        console.log('jackpotRemaining', notif.args);
+    };
+    LineIt.prototype.notif_discardRemaining = function (notif) {
+        console.log('discardRemaining', notif.args);
+    };
+    LineIt.prototype.notif_newFirstPlayer = function (notif) {
+        var firstPlayerToken = document.getElementById('first-player-token');
+        var destinationId = "first-player-token-wrapper-".concat(notif.args.playerId);
+        var originId = firstPlayerToken.parentElement.id;
+        if (destinationId !== originId) {
+            this.animationManager.attachWithSlideAnimation(firstPlayerToken, document.getElementById(destinationId), { zoom: 1 });
+        }
+    };
+    LineIt.prototype.notif_playCard = function (notif) {
+        this.getPlayerTable(notif.args.playerId).hand.addCard(notif.args.card);
+    };
+    LineIt.prototype.notif_applyJackpot = function (notif) {
+        console.log('applyJackpot', notif.args);
     };
     LineIt.prototype.notif_betResult = function (notif) {
-        //this.getPlayerTable(notif.args.playerId).showAnnouncementBetResult(notif.args.result);
+        console.log('betResult', notif.args);
+    };
+    LineIt.prototype.notif_closeLine = function (notif) {
+        console.log('closeLine', notif.args);
     };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
     LineIt.prototype.format_string_recursive = function (log, args) {
         try {
             if (log && args && !args.processed) {
-                if (args.announcement && args.announcement[0] != '<') {
-                    args.announcement = "<strong style=\"color: darkred;\">".concat(_(args.announcement), "</strong>");
+                if (args.cardValue == '' && args.card) {
+                    args.cardValue = "<strong data-color=\"".concat(args.card.color, "\">").concat(args.card.type == 2 && args.card.number > 0 ? '+' : '').concat(args.card.number, "</strong>");
                 }
-                if (args.call && args.call.length && args.call[0] != '<') {
-                    args.call = "<strong class=\"title-bar-call\">".concat(_(args.call), "</strong>");
-                }
-                ['discardNumber', 'roundPoints', 'cardsPoints', 'colorBonus', 'cardName', 'cardName1', 'cardName2', 'cardColor', 'cardColor1', 'cardColor2', 'points', 'result'].forEach(function (field) {
-                    if (args[field] !== null && args[field] !== undefined && args[field][0] != '<') {
-                        args[field] = "<strong>".concat(_(args[field]), "</strong>");
-                    }
-                });
             }
         }
         catch (e) {

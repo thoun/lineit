@@ -14,19 +14,16 @@ class LineIt implements LineItGame {
     public cardsManager: CardsManager;
 
     private zoomManager: ZoomManager;
+    private animationManager: AnimationManager;
     private gamedatas: LineItGamedatas;
     private tableCenter: TableCenter;
     private playersTables: PlayerTable[] = [];
     private handCounters: Counter[] = [];
-    private deckCounter: Counter;
+    private selectedCardId: number;
     
     private TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
 
     constructor() {
-        /*const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
-        if (zoomStr) {
-            this.zoom = Number(zoomStr);
-        }*/
     }
     
     /*
@@ -50,6 +47,7 @@ class LineIt implements LineItGame {
         log('gamedatas', gamedatas);
 
         this.cardsManager = new CardsManager(this);
+        this.animationManager = new AnimationManager(this);
         this.tableCenter = new TableCenter(this, gamedatas);
         this.createPlayerPanels(gamedatas);
         this.createPlayerTables(gamedatas);
@@ -62,15 +60,7 @@ class LineIt implements LineItGame {
                 color: 'white',
             },
             localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
-            /*autoZoom: {
-                expectedWidth: this.factories.getWidth(),
-            },*/
-            // onDimensionsChange: (newZoom) => this.onTableCenterSizeChange(newZoom),
         });
-
-        this.deckCounter = new ebg.counter();
-        this.deckCounter.create(`deck-counter`);
-        this.deckCounter.setValue(this.gamedatas.deck);
 
         this.setupNotifications();
         this.setupPreferences();
@@ -93,13 +83,13 @@ class LineIt implements LineItGame {
         log('Entering state: ' + stateName, args.args);
 
         switch (stateName) {
-            case 'takeCards':
-                this.onEnteringTakeCards(args);
+            case 'chooseMarketCard':
+                this.onEnteringChooseMarketCard(args.args);
                 break;
-            /*case 'chooseCard':
-                this.onEnteringChooseCard(args.args);
+           case 'playCard':
+                this.onEnteringPlayCard(args.args);
                 break;
-            case 'putDiscardPile':
+            /*case 'putDiscardPile':
                 this.onEnteringPutDiscardPile(args.args);
                 break;
             case 'playCards':
@@ -124,90 +114,26 @@ class LineIt implements LineItGame {
         (this as any).updatePageTitle();
     }
     
-    private onEnteringTakeCards(argsRoot: { args: EnteringChooseContinueArgs, active_player: string }) {
-        const args = argsRoot.args;
-
-        /*if (!args.canTakeFromDiscard.length) {
-            this.setGamestateDescription('NoDiscard');
-        }*/
-
+    private onEnteringChooseMarketCard(args: EnteringChooseMarketCardArgs) {
         if ((this as any).isCurrentPlayerActive()) {
-            //this.stacks.makeDeckSelectable(args.canTakeFromDeck);
-            //this.stacks.makeDiscardSelectable(true);
+            this.selectedCardId = null;
+            this.tableCenter.setSelectable(true, args.canAddToHand ? null : args.canPlaceOnLine);
         }
     }
     
-    /*private onEnteringChooseCard(args: EnteringChooseCardArgs) {
-        this.stacks.showPickCards(true, args._private?.cards ?? args.cards);
-        if ((this as any).isCurrentPlayerActive()) {
-            setTimeout(() => this.stacks.makePickSelectable(true), 500);
-        } else {
-            this.stacks.makePickSelectable(false);
-        }        
-        this.stacks.setDeckCount(args.remainingCardsInDeck);
-    }
-    
-    private onEnteringPutDiscardPile(args: EnteringChooseCardArgs) {
-        this.stacks.showPickCards(true, args._private?.cards ?? args.cards);
-        this.stacks.makeDiscardSelectable((this as any).isCurrentPlayerActive());
-    }
-
-    private onEnteringPlayCards() {
-        this.stacks.showPickCards(false);
-        this.selectedCards = [];
-
-        this.updateDisabledPlayCards();
-    }
-    
-    private onEnteringChooseDiscardPile() {
-        this.stacks.makeDiscardSelectable((this as any).isCurrentPlayerActive());
-    }
-    
-    private onEnteringChooseDiscardCard(args: EnteringChooseCardArgs) {
-        const cards = args._private?.cards || args.cards;
-        const pickDiv = document.getElementById('discard-pick');
-        pickDiv.innerHTML = '';
-        pickDiv.dataset.visible = 'true';
-
-        cards?.forEach(card => {
-            this.cards.createMoveOrUpdateCard(card, `discard-pick`, false, 'discard'+args.discardNumber);
-            if ((this as any).isCurrentPlayerActive()) {
-                document.getElementById(`card-${card.id}`).classList.add('selectable');
-            }
-        });
-
-        this.updateTableHeight();
-    }
-    
-    private onEnteringChooseOpponent(args: EnteringChooseOpponentArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
-            args.playersIds.forEach(playerId => 
-                document.getElementById(`player-table-${playerId}-hand-cards`).dataset.canSteal = 'true'
-            );
+    private onEnteringPlayCard(args: EnteringPlayCardArgs) {
+        if (args.mustClose) {
+            this.setGamestateDescription(`Forced`);
         }
-    }*/
+    }
 
     public onLeavingState(stateName: string) {
         log( 'Leaving state: '+stateName );
 
         switch (stateName) {
-           /* case 'takeCards':
-                this.onLeavingTakeCards();
-                break;
-            case 'chooseCard':
-                this.onLeavingChooseCard();
-                break;
-            case 'putDiscardPile':
-                this.onLeavingPutDiscardPile();
-                break;
-            case 'playCards':
-                this.onLeavingPlayCards();
-                break;
-            case 'chooseDiscardCard':
-                this.onLeavingChooseDiscardCard();
-                break;*/
-            case 'chooseOpponent':
-                this.onLeavingChooseOpponent();
+           case 'chooseMarketCard':
+                this.selectedCardId = null;
+                this.tableCenter.setSelectable(false);
                 break;
         }
     }
@@ -246,10 +172,22 @@ class LineIt implements LineItGame {
     public onUpdateActionButtons(stateName: string, args: any) {
         if ((this as any).isCurrentPlayerActive()) {
             switch (stateName) {
-                case 'chooseContinue':
-                    const chooseContinueArgs = args as EnteringChooseContinueArgs;
-                    (this as any).addActionButton(`continue_button`, _("Continue"), () => this.continue());
-                    (this as any).addActionButton(`stop_button`, _("Stop"), () => this.stop(chooseContinueArgs.shouldNotStop));
+                case 'chooseMarketCard':
+                    this.selectedCardId = null;
+                    (this as any).addActionButton(`addLine_button`, _("Add selected card to line"), () => this.chooseMarketCardLine());
+                    (this as any).addActionButton(`addHand_button`, _("Add selected card to hand"), () => this.chooseMarketCardHand());
+                    [`addLine_button`, `addHand_button`].forEach(id => document.getElementById(id).classList.add('disabled'));
+                    break;
+                case 'playCard':
+                    const playCardArgs = args as EnteringPlayCardArgs;
+                    (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
+                    (this as any).addActionButton(`pass_button`, _("Pass"), () => this.pass());
+                    if (!playCardArgs.canClose) {
+                        document.getElementById(`closeLine_button`).classList.add('disabled');
+                    }                    
+                    if (playCardArgs.mustClose) {
+                        document.getElementById(`pass_button`).classList.add('disabled');
+                    }
                     break;
             }
         }
@@ -354,6 +292,12 @@ class LineIt implements LineItGame {
             handCounter.create(`playerhand-counter-${playerId}`);
             handCounter.setValue(player.hand.length);
             this.handCounters[playerId] = handCounter;
+
+            // first player
+            dojo.place(`<div id="first-player-token-wrapper-${player.id}" class="first-player-token-wrapper"></div>`, `player_board_${player.id}`);
+            if (gamedatas.firstPlayerId == playerId) {
+                dojo.place(`<div id="first-player-token" class="first-player-token"></div>`, `first-player-token-wrapper-${player.id}`);
+            }
         });
 
         this.setTooltipToClass('playerhand-counter', _('Number of cards in hand'));
@@ -373,78 +317,18 @@ class LineIt implements LineItGame {
     }
 
     public onMarketCardClick(card: Card): void {
-        // TODO
-    }
-    
-    public onCardClick(card: Card): void {
-        const cardDiv = document.getElementById(`card-${card.id}`);
-        const parentDiv = cardDiv.parentElement;
-
-        if (cardDiv.classList.contains('disabled')) {
+        const args: EnteringChooseMarketCardArgs = this.gamedatas.gamestate.args;
+        if (!args.canAddToHand && !args.canPlaceOnLine.some(s => s.id == card.id)) {
             return;
         }
 
-        /*switch (this.gamedatas.gamestate.name) {
-            case 'takeCards':
-                if (parentDiv.dataset.discard) {
-                    this.takeCardFromDiscard(Number(parentDiv.dataset.discard));
-                }
-                break;
-            case 'chooseCard':
-                if (parentDiv.id == 'pick') {
-                    this.chooseCard(card.id);
-                }
-                break;
-            case 'playCards':
-                if (parentDiv.dataset.myHand == `true`) {
-                    if (this.selectedCards.includes(card.id)) {
-                        this.selectedCards.splice(this.selectedCards.indexOf(card.id), 1);
-                        cardDiv.classList.remove('selected');
-                    } else {
-                        this.selectedCards.push(card.id);
-                        cardDiv.classList.add('selected');
-                    }
-                    this.updateDisabledPlayCards();
-                }
-                break;
-            case 'chooseDiscardCard':
-                if (parentDiv.id == 'discard-pick') {
-                    this.chooseDiscardCard(card.id);
-                }
-                break;
-            case 'chooseOpponent':
-                const chooseOpponentArgs = this.gamedatas.gamestate.args as EnteringChooseContinueArgs;
-                if (parentDiv.dataset.currentPlayer == 'false') {
-                    const stealPlayerId = Number(parentDiv.dataset.playerId);
-                    if (chooseOpponentArgs.playersIds.includes(stealPlayerId)) {
-                        this.chooseOpponent(stealPlayerId);
-                    }
-                }
-                break;
-        }*/
+        this.selectedCardId = card.id;
+        document.getElementById(`addLine_button`).classList.toggle('disabled', !(args.canAddToLine && args.canPlaceOnLine.some(s => s.id == card.id)));
+        document.getElementById(`addHand_button`).classList.toggle('disabled', !args.canAddToHand);
     }
 
-    public continue() {
-        if(!(this as any).checkAction('continue')) {
-            return;
-        }
-
-        this.takeAction('continue');
-    }
-
-    public stop(warning: boolean) {
-        if(!(this as any).checkAction('stop')) {
-            return;
-        }
-
-        if (warning) {
-            (this as any).confirmationDialog(
-                _("Are you sure you want to stop here? There is no risk if you continue the sequence."), 
-                () => this.stop(false)
-            );
-        }
-
-        this.takeAction('stop');
+    public onHandCardClick(card: Card): void {
+        this.playCardFromHand(card.id);
     }
   	
     public playCardFromHand(id: number) {
@@ -457,14 +341,40 @@ class LineIt implements LineItGame {
         });
     }
   	
-    public playCardFromDeck(number: number) {
-        if(!(this as any).checkAction('playCardFromDeck')) {
+    public chooseMarketCardLine() {
+        if(!(this as any).checkAction('chooseMarketCardLine')) {
             return;
         }
 
-        this.takeAction('playCardFromDeck', {
-            number
+        this.takeAction('chooseMarketCardLine', {
+            id: this.selectedCardId,
         });
+    }
+  	
+    public chooseMarketCardHand() {
+        if(!(this as any).checkAction('chooseMarketCardHand')) {
+            return;
+        }
+
+        this.takeAction('chooseMarketCardHand', {
+            id: this.selectedCardId,
+        });
+    }
+  	
+    public closeLine() {
+        if(!(this as any).checkAction('closeLine')) {
+            return;
+        }
+
+        this.takeAction('closeLine');
+    }
+  	
+    public pass() {
+        if(!(this as any).checkAction('pass')) {
+            return;
+        }
+
+        this.takeAction('pass');
     }
 
     public takeAction(action: string, data?: any) {
@@ -489,45 +399,71 @@ class LineIt implements LineItGame {
         //log( 'notifications subscriptions setup' );
 
         const notifs = [
-            ['cardInDiscardFromDeck', ANIMATION_MS],
-            ['cardInHandFromDiscard', ANIMATION_MS],
-            ['cardInHandFromDiscardCrab', ANIMATION_MS],
-            ['cardInHandFromPick', ANIMATION_MS],
-            ['cardInHandFromDeck', ANIMATION_MS],
-            ['cardInDiscardFromPick', ANIMATION_MS],
-            ['playCards', ANIMATION_MS],
-            ['stealCard', ANIMATION_MS],
-            ['revealHand', ANIMATION_MS * 2],
-            ['announceEndRound', ANIMATION_MS * 2],
-            ['betResult', ANIMATION_MS * 2],
-            ['endRound', ANIMATION_MS * 2],
-            ['score', ANIMATION_MS * 3],
-            ['newRound', 1],
-            ['updateCardsPoints', 1],
-            ['emptyDeck', 1],
+            ['newMarket', ANIMATION_MS],
+            ['chooseMarketCardHand', ANIMATION_MS],
+            ['jackpotRemaining', 100],
+            ['discardRemaining', 100],
+            ['newFirstPlayer', ANIMATION_MS],
+            ['playCard', ANIMATION_MS],
+            ['applyJackpot', ANIMATION_MS],
+            ['betResult', ANIMATION_MS],
+            ['closeLine', ANIMATION_MS],
         ];
     
-        /*notifs.forEach((notif) => {
+        notifs.forEach((notif) => {
             dojo.subscribe(notif[0], this, `notif_${notif[0]}`);
             (this as any).notifqueue.setSynchronous(notif[0], notif[1]);
         });
+    }
 
-        (this as any).notifqueue.setIgnoreNotificationCheck('cardInHandFromPick', (notif: Notif<NotifCardInHandFromPickArgs>) => 
-            notif.args.playerId == this.getPlayerId() && !notif.args.card.category
-        );
-        (this as any).notifqueue.setIgnoreNotificationCheck('cardInHandFromDeck', (notif: Notif<NotifCardInHandFromPickArgs>) => 
-            notif.args.playerId == this.getPlayerId() && !notif.args.card.category
-        );
-        (this as any).notifqueue.setIgnoreNotificationCheck('cardInHandFromDiscardCrab', (notif: Notif<NotifCardInHandFromDiscardArgs>) => 
-            notif.args.playerId == this.getPlayerId() && !notif.args.card.category
-        );
-        (this as any).notifqueue.setIgnoreNotificationCheck('stealCard', (notif: Notif<NotifStealCardArgs>) => 
-            [notif.args.playerId, notif.args.opponentId].includes(this.getPlayerId()) && !(notif.args as any).cardName
-        );*/
+    notif_newMarket(notif: Notif<NotifNewMarketArgs>) {
+        this.tableCenter.newMarket(notif.args.cards);
+        this.tableCenter.setDeck(notif.args.deck);
+    }
+
+    notif_chooseMarketCardHand(notif: Notif<NotifChooseMarketCardHandArgs>) {
+        if (notif.args.playerId == this.getPlayerId()) {
+            this.getPlayerTable(notif.args.playerId).hand.addCard(notif.args.card);
+        } else {
+            this.tableCenter.market.removeCard(notif.args.card);
+        }
+    }
+
+    notif_jackpotRemaining(notif: Notif<NotifJackpotRemainingArgs>) {
+        console.log('jackpotRemaining', notif.args);
+    }
+
+    notif_discardRemaining(notif: Notif<NotifJackpotRemainingArgs>) {
+        console.log('discardRemaining', notif.args);
+    }
+
+    notif_newFirstPlayer(notif: Notif<NotifNewFirstPlayerArgs>) {
+        const firstPlayerToken = document.getElementById('first-player-token');
+        const destinationId = `first-player-token-wrapper-${notif.args.playerId}`;
+        const originId = firstPlayerToken.parentElement.id;
+        if (destinationId !== originId) {
+            this.animationManager.attachWithSlideAnimation(
+                firstPlayerToken,
+                document.getElementById(destinationId),
+                { zoom: 1 },
+            );
+        }
+    }
+
+    notif_playCard(notif: Notif<NotifPlayCardArgs>) {
+        this.getPlayerTable(notif.args.playerId).hand.addCard(notif.args.card);
+    }
+
+    notif_applyJackpot(notif: Notif<NotifApplyJackpotArgs>) {
+        console.log('applyJackpot', notif.args);
     }
 
     notif_betResult(notif: Notif<NotifBetResultArgs>) {
-        //this.getPlayerTable(notif.args.playerId).showAnnouncementBetResult(notif.args.result);
+        console.log('betResult', notif.args);
+    }
+
+    notif_closeLine(notif: Notif<NotifApplyJackpotArgs>) {
+        console.log('closeLine', notif.args);
     }
 
 
@@ -536,19 +472,9 @@ class LineIt implements LineItGame {
     public format_string_recursive(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
-                if (args.announcement && args.announcement[0] != '<') {
-                    args.announcement = `<strong style="color: darkred;">${_(args.announcement)}</strong>`;
+                if (args.cardValue == '' && args.card) {
+                    args.cardValue = `<strong data-color="${args.card.color}">${args.card.type == 2 && args.card.number > 0 ? '+' : ''}${args.card.number}</strong>`;
                 }
-                if (args.call && args.call.length && args.call[0] != '<') {
-                    args.call = `<strong class="title-bar-call">${_(args.call)}</strong>`;
-                }
-
-                ['discardNumber', 'roundPoints', 'cardsPoints', 'colorBonus', 'cardName', 'cardName1', 'cardName2', 'cardColor', 'cardColor1', 'cardColor2', 'points', 'result'].forEach(field => {
-                    if (args[field] !== null && args[field] !== undefined && args[field][0] != '<') {
-                        args[field] = `<strong>${_(args[field])}</strong>`;
-                    }
-                })
-
             }
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);

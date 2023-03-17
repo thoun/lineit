@@ -32,7 +32,12 @@ trait ActionTrait {
         
         $playerId = intval($this->getActivePlayerId());
 
-        $this->playCard($playerId, $id);
+        $args = $this->argChooseMarketCard();
+        if (!$this->array_some($args['canPlaceOnLine'], fn($card) => $card->id == $id)) {
+            throw new BgaUserException("You can't play this card");
+        }
+
+        $this->playCard($playerId, $id, true);
 
         $this->gamestate->nextState('next');
     }

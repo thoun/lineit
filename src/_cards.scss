@@ -73,7 +73,7 @@
     }    
 
     &.selected:not(.disabled) {
-        box-shadow: 0 0 5px 8px orange;
+        box-shadow: 0 0 5px 8px #e273f5;
 
         .card-side {
             box-shadow: unset;

@@ -143,10 +143,12 @@ trait UtilTrait {
         return array_map(fn($dbResult) => new LineItPlayer($dbResult), array_values($dbResults));
     }
 
-    function playCard(int $playerId, int $id) {
+    function playCard(int $playerId, int $id, $fromMarket = false) {
         $args = $this->argChooseMarketCard();
         $card = $this->array_find($args['canPlaceOnLine'], fn($c) => $c->id == $id);
-        if ($card == null || $card->location != 'hand' || $card->locationArg != $playerId) {
+        if (($card == null)  ||
+            (!$fromMarket && ($card->location != 'hand' || $card->locationArg != $playerId)) ||
+            ($fromMarket && $card->location != 'market')) {
             throw new BgaUserException("You can't play this card");
         }
 
@@ -206,6 +208,7 @@ trait UtilTrait {
             self::notifyAllPlayers('betResult', $betWon ? clienttranslate('${player_name} won the ${cardValue} bet') : clienttranslate('${player_name} lost the ${cardValue} bet'), [
                 'playerId' => $playerId,
                 'player_name' => $this->getPlayerName($playerId),
+                'value' => $tokenNumber,
                 'card' => $betCard,
                 'cardValue' => '',
                 'preserve' => ['card', 'cardValue'],
@@ -231,7 +234,7 @@ trait UtilTrait {
         ]);
     }
 
-    function getColor(int $color) {
+    function getColorName(int $color) {
         switch ($color) {
             case 1: return clienttranslate('Red');
             case 2: return clienttranslate('Blue');

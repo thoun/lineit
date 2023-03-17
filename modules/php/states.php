@@ -17,12 +17,24 @@ trait StateTrait {
         // place new market cards
         $this->cards->pickCardsForLocation($this->getRoundCardCount(), 'deck', 'market'); 
 
+        self::notifyAllPlayers('newMarket', clienttranslate('Marked is refilled'), [
+            'cards' => $this->getCardsByLocation('market'),
+            'deck' => intval($this->cards->countCardInLocation('deck')),
+        ]);
+
         $this->gamestate->nextState('next');
     }
 
     function stChooseMarketCard() {
         $args = $this->argChooseMarketCard();
-        if (!$args['canAddToLine'] && !$args['canAddToHand']) {        
+        if (!$args['canAddToLine'] && !$args['canAddToHand']) {  
+            $playerId = intval($this->getActivePlayerId());
+
+            self::notifyAllPlayers('log', clienttranslate('${player_name} cannot play a market card or add one to his hand, so he must close the line !'), [
+                'playerId' => $playerId,
+                'player_name' => $this->getPlayerName($playerId),
+            ]);
+
             $this->gamestate->nextState('next');
         }
     }

@@ -88,16 +88,16 @@ $gameinfos = [
 'language_dependency' => false,
 
 // Complexity of the game, from 0 (extremely simple) to 5 (extremely complex)
-'complexity' => 3,    
+'complexity' => 1,    
 
 // Luck of the game, from 0 (absolutely no luck in this game) to 5 (totally luck driven)
 'luck' => 3,    
 
 // Strategy of the game, from 0 (no strategy can be setup) to 5 (totally based on strategy)
-'strategy' => 3,    
+'strategy' => 1,    
 
 // Diplomacy of the game, from 0 (no interaction in this game) to 5 (totally based on interaction and discussion between players)
-'diplomacy' => 3,    
+'diplomacy' => 1,    
 
 // Colors attributed to players
   'player_colors' => [
@@ -124,20 +124,20 @@ $gameinfos = [
 
 // Game interface width range (pixels)
 // Note: game interface = space on the left side, without the column on the right
-'game_interface_width' => array(
+'game_interface_width' => [
 
     // Minimum width
     //  default: 740
     //  maximum possible value: 740 (ie: your game interface should fit with a 740px width (correspond to a 1024px screen)
     //  minimum possible value: 320 (the lowest value you specify, the better the display is on mobile)
-    'min' => 740,
+    'min' => 610,
 
     // Maximum width
     //  default: null (ie: no limit, the game interface is as big as the player's screen allows it).
     //  maximum possible value: unlimited
     //  minimum possible value: 740
     'max' => null
-),
+  ],
 
 // Game presentation
 // Short game presentation text that will appear on the game description page, structured as an array of paragraphs.

@@ -30,6 +30,7 @@ interface LineItGamedatas {
     tablespeed: string;
 
     // Add here variables you set up in getAllDatas
+    firstPlayerId: number;
     market: Card[];
     jackpots: { [color: number]: Card[] };
     deck: number;
@@ -47,76 +48,66 @@ interface LineItGame extends Game {
     onMarketCardClick(card: Card): void;
 }
 
-interface EnteringChooseContinueArgs {
-    shouldNotStop: boolean;
+interface EnteringChooseMarketCardArgs {
+    canPlaceOnLine: Card[];
+    canAddToLine: boolean;
+    canAddToHand: boolean;
 }
 
-/*interface EnteringPlayCardArgs {
-    _private?: {
-        cards: Card[];
-    }
+interface EnteringPlayCardArgs {
+    canPlaceOnLine: Card[];
+    canClose: boolean;
+    mustClose: boolean;
+}
+
+interface EnteringPlayHandCardArgs {
+    canPlaceOnLine: Card[];
+}
+
+// newMarket
+interface NotifNewMarketArgs {
     cards: Card[];
-    discardNumber?: number;
-    remainingCardsInDeck: number;
-}*/
-
-interface NotifCardInDiscardFromDeckArgs {
-    card: Card;
-    discardId: number;
-    remainingCardsInDeck: number;
+    deck: number;
 }
 
-interface NotifCardInHandFromDiscardArgs {
+// chooseMarketCardHand
+interface NotifChooseMarketCardHandArgs {
     playerId: number;
     card: Card;
-    discardId: number;
-    newDiscardTopCard: Card | null;
-    remainingCardsInDiscard: number;
 }
 
-interface NotifCardInHandFromPickArgs {
+// jackpotRemaining, discardRemaining
+interface NotifJackpotRemainingArgs {
+    color: number;
+    card: Card;
+}
+// newFirstPlayer
+interface NotifNewFirstPlayerArgs {
     playerId: number;
-    card?: Card;
-}
+}  
 
-interface NotifCardInDiscardFromPickArgs {
+// playCard
+interface NotifPlayCardArgs {
     playerId: number;
     card: Card;
-    discardId: number;
-    remainingCardsInDiscard: number;
-}
+} 
 
-interface NotifScoreArgs {
+// applyJackpot
+interface NotifApplyJackpotArgs {
     playerId: number;
-    newScore: number;
-    incScore: number;
+    color: number;
+    count: number | string;
 }
 
-interface NotifPlayCardsArgs {
-    playerId: number;
-    cards: Card[];
-}
-
-interface NotifRevealHandArgs extends NotifPlayCardsArgs {
-    playerPoints: number;
-}
-
-interface NotifAnnounceEndRoundArgs {
-    playerId: number;
-    announcement: string;
-}
-
+// betResult
 interface NotifBetResultArgs {
     playerId: number;
-    result: string;
+    value: number;
 }
 
-interface NotifUpdateCardsPointsArgs {
-    cardsPoints: number;
-}
-
-interface NotifStealCardArgs {
+// closeLine
+interface NotifApplyJackpotArgs {
     playerId: number;
-    opponentId: number;
-    card: Card;
+    count: number | string;
+    removed: number | string;
 }
