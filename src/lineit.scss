@@ -24,7 +24,8 @@
 
 html, .mode_3d #game_play_area_background {
   background: url('img/background.jpg');
-  background-size: 100% auto;
+  background-position: top center;
+  background-repeat: repeat;
 }
 
 #zoom-wrapper {
