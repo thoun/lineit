@@ -42,6 +42,13 @@ trait StateTrait {
         }
     }
 
+    function stPlayCard() {
+        $args = $this->argPlayCard();
+        if (!$args['canClose'] && $args['onlyClose']) { // cannot do anything
+            $this->gamestate->nextState('next');
+        }
+    }
+
     function stNextPlayer() {
         $this->setGameStateValue(FORCE_CLOSE, 0);
 

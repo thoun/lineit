@@ -117,6 +117,10 @@ trait UtilTrait {
         $hasBetCard = count(array_filter($line, fn($card) => $card->type == 2)) > 0;
         $lineWithoutBet = array_values(array_filter($line, fn($card) => $card->type == 1));
 
+        if ($hasBetCard) {
+            $cards = array_values(array_filter($cards, fn($card) => $card->type != 2));
+        }
+
         if (count($lineWithoutBet) < 2) {
             return $cards;
         }
@@ -124,10 +128,6 @@ trait UtilTrait {
         $direction = $lineWithoutBet[1]->number - $lineWithoutBet[0]->number;
 
         $lineLastNumber = $lineWithoutBet[count($lineWithoutBet) - 1]->number;
-
-        if ($hasBetCard) {
-            $cards = array_values(array_filter($cards, fn($card) => $card->type != 2));
-        }
 
         if ($direction > 0) {
             return array_values(array_filter($cards, fn($card) => $card->type != 1 || $card->number > $lineLastNumber));
@@ -149,7 +149,7 @@ trait UtilTrait {
     }
 
     function playCard(int $playerId, int $id, $fromMarket = false) {
-        $args = $this->argChooseMarketCard(); // TODO check add +5 from market after a +3 played from hand (same turn)
+        $args = $this->argChooseMarketCard();
         $card = $this->array_find($args['canPlaceOnLine'], fn($c) => $c->id == $id);
         if (($card == null)  ||
             (!$fromMarket && ($card->location != 'hand' || $card->locationArg != $playerId)) ||

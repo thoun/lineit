@@ -101,6 +101,7 @@ $playerActionsGameStates = [
         "descriptionmyturnForced" => clienttranslate('${you} must close the line'),
         "type" => "activeplayer",    
         "args" => "argPlayCard",
+        "action" => "stPlayCard",
         "possibleactions" => [ 
             "playCardFromHand",
             "closeLine",
