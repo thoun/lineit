@@ -16,10 +16,10 @@ $gameinfos = [
 'game_name' => "Line It",
 
 // Game designer (or game designers, separated by commas)
-'designer' => 'John Doe',       
+'designer' => 'Tim Juretzki',       
 
 // Game artist (or game artists, separated by commas)
-'artist' => 'Jane Doe',         
+'artist' => 'Joey & Grumpy',         
 
 // Year of FIRST publication of this game. Can be negative.
 'year' => 2023,                 
