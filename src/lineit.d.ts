@@ -46,6 +46,7 @@ interface LineItGame extends Game {
 
     setTooltip(id: string, html: string): void;
     onHandCardClick(card: Card): void;
+    onLineCardClick(card: Card): void;
     onMarketCardClick(card: Card): void;
 }
 

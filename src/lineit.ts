@@ -124,6 +124,7 @@ class LineIt implements LineItGame {
                 this.selectedCardId = null;
                 this.tableCenter.setSelectable(false);
                 this.getCurrentPlayerTable()?.setSelectable(false);
+                this.getCurrentPlayerTable()?.addCardsPlaceholders(false, false);
                 break;
             case 'playCard':
             case 'playHandCard':
@@ -315,12 +316,26 @@ class LineIt implements LineItGame {
         }
 
         this.selectedCardId = card.id;
-        document.getElementById(`addLine_button`).classList.toggle('disabled', !(args.canAddToLine && args.canPlaceOnLine.some(s => s.id == card.id)));
-        document.getElementById(`addHand_button`).classList.toggle('disabled', !args.canAddToHand);
+        const canPlaceCardOnLine = args.canAddToLine && args.canPlaceOnLine.some(s => s.id == card.id);
+        const canPlaceCardOnHand = args.canAddToHand;
+        document.getElementById(`addLine_button`).classList.toggle('disabled', !canPlaceCardOnLine);
+        document.getElementById(`addHand_button`).classList.toggle('disabled', !canPlaceCardOnHand);
+
+        this.getCurrentPlayerTable()?.addCardsPlaceholders(canPlaceCardOnLine, canPlaceCardOnHand);
     }
 
     public onHandCardClick(card: Card): void {
-        this.playCardFromHand(card.id);
+        if (card.id < 0) {
+            this.chooseMarketCardHand();
+        } else {
+            this.playCardFromHand(card.id);
+        }
+    }
+
+    public onLineCardClick(card: Card): void {
+        if (card.id < 0) {
+            this.chooseMarketCardLine();
+        }
     }
   	
     public playCardFromHand(id: number) {

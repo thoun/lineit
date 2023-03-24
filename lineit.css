@@ -308,6 +308,13 @@ body > .card {
 .card.selected:not(.disabled) .card-side {
   box-shadow: unset;
 }
+.card[data-type="0"] .front {
+  background: rgba(255, 255, 255, 0.3137254902);
+}
+.card[data-type="0"] .front .placeholder-text {
+  font-size: 12pt;
+  padding: 8px;
+}
 .card[data-type="1"][data-color="1"] .front {
   background-position-x: 14.2857142857%;
 }

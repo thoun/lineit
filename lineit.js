@@ -1221,6 +1221,9 @@ var CardsManager = /** @class */ (function (_super) {
                 if (card.type == 1) {
                     div.innerHTML = "\n                        <div class=\"center-number\">".concat(card.number, "</div>\n                        <div class=\"corner-number left\">").concat(card.number, "</div>\n                        <div class=\"corner-number right\">").concat(card.number, "</div>\n                        <div class=\"corner-number rotated\">").concat(card.number, "</div>\n                    ");
                 }
+                else if (card.type == 0) {
+                    div.innerHTML = "\n                        <div class=\"placeholder-text\">".concat(card.number == -1 ? _("Add selected card to line") : _("Add selected card to hand"), "</div>\n                    ");
+                }
             },
             setupBackDiv: function (card, div) { }
         }) || this;
@@ -1353,6 +1356,9 @@ var PlayerTable = /** @class */ (function () {
             this.hand.addCards(player.hand);
         }
         this.line = new LineStock(this.game.cardsManager, document.getElementById("player-table-".concat(this.playerId, "-line")));
+        if (this.currentPlayer) {
+            this.line.onCardClick = function (card) { return _this.game.onLineCardClick(card); };
+        }
         this.line.addCards(player.line);
     }
     PlayerTable.prototype.setSelectable = function (selectable, selectableCards) {
@@ -1365,6 +1371,32 @@ var PlayerTable = /** @class */ (function () {
             element.classList.toggle('disabled', disabled);
             element.classList.toggle('selectable', selectable && !disabled);
         });
+    };
+    PlayerTable.prototype.addCardsPlaceholders = function (canPlaceCardOnLine, canPlaceCardOnHand) {
+        var linePlaceholder = this.getPlaceholderCard('line');
+        if (canPlaceCardOnLine) {
+            this.line.addCard(linePlaceholder);
+            this.line.getCardElement(linePlaceholder).classList.add('selectable');
+        }
+        else {
+            this.line.removeCard(linePlaceholder);
+        }
+        var handPlaceholder = this.getPlaceholderCard('hand');
+        if (canPlaceCardOnHand) {
+            this.hand.addCard(handPlaceholder);
+            this.hand.getCardElement(handPlaceholder).classList.add('selectable');
+        }
+        else {
+            this.hand.removeCard(handPlaceholder);
+        }
+    };
+    PlayerTable.prototype.getPlaceholderCard = function (destination) {
+        var id = destination == 'line' ? -1 : -2;
+        return {
+            id: id,
+            type: 0,
+            number: id,
+        };
     };
     return PlayerTable;
 }());
@@ -1456,17 +1488,18 @@ var LineIt = /** @class */ (function () {
         }
     };
     LineIt.prototype.onLeavingState = function (stateName) {
-        var _a, _b;
+        var _a, _b, _c;
         log('Leaving state: ' + stateName);
         switch (stateName) {
             case 'chooseMarketCard':
                 this.selectedCardId = null;
                 this.tableCenter.setSelectable(false);
                 (_a = this.getCurrentPlayerTable()) === null || _a === void 0 ? void 0 : _a.setSelectable(false);
+                (_b = this.getCurrentPlayerTable()) === null || _b === void 0 ? void 0 : _b.addCardsPlaceholders(false, false);
                 break;
             case 'playCard':
             case 'playHandCard':
-                (_b = this.getCurrentPlayerTable()) === null || _b === void 0 ? void 0 : _b.setSelectable(false);
+                (_c = this.getCurrentPlayerTable()) === null || _c === void 0 ? void 0 : _c.setSelectable(false);
                 break;
         }
     };
@@ -1606,16 +1639,30 @@ var LineIt = /** @class */ (function () {
         this.incScore(playerId, inc);
     };
     LineIt.prototype.onMarketCardClick = function (card) {
+        var _a;
         var args = this.gamedatas.gamestate.args;
         if (!args.canAddToHand && !args.canPlaceOnLine.some(function (s) { return s.id == card.id; })) {
             return;
         }
         this.selectedCardId = card.id;
-        document.getElementById("addLine_button").classList.toggle('disabled', !(args.canAddToLine && args.canPlaceOnLine.some(function (s) { return s.id == card.id; })));
-        document.getElementById("addHand_button").classList.toggle('disabled', !args.canAddToHand);
+        var canPlaceCardOnLine = args.canAddToLine && args.canPlaceOnLine.some(function (s) { return s.id == card.id; });
+        var canPlaceCardOnHand = args.canAddToHand;
+        document.getElementById("addLine_button").classList.toggle('disabled', !canPlaceCardOnLine);
+        document.getElementById("addHand_button").classList.toggle('disabled', !canPlaceCardOnHand);
+        (_a = this.getCurrentPlayerTable()) === null || _a === void 0 ? void 0 : _a.addCardsPlaceholders(canPlaceCardOnLine, canPlaceCardOnHand);
     };
     LineIt.prototype.onHandCardClick = function (card) {
-        this.playCardFromHand(card.id);
+        if (card.id < 0) {
+            this.chooseMarketCardHand();
+        }
+        else {
+            this.playCardFromHand(card.id);
+        }
+    };
+    LineIt.prototype.onLineCardClick = function (card) {
+        if (card.id < 0) {
+            this.chooseMarketCardLine();
+        }
     };
     LineIt.prototype.playCardFromHand = function (id) {
         if (!this.checkAction('playCardFromHand')) {

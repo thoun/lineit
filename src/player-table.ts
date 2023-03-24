@@ -37,6 +37,9 @@ class PlayerTable {
         }
         
         this.line = new LineStock<Card>(this.game.cardsManager, document.getElementById(`player-table-${this.playerId}-line`));
+        if (this.currentPlayer) {
+            this.line.onCardClick = (card: Card) => this.game.onLineCardClick(card);
+        }
         
         this.line.addCards(player.line);
     }
@@ -49,5 +52,32 @@ class PlayerTable {
             element.classList.toggle('disabled', disabled);
             element.classList.toggle('selectable', selectable && !disabled);
         });
+    }
+    
+    public addCardsPlaceholders(canPlaceCardOnLine: boolean, canPlaceCardOnHand: boolean) {
+        const linePlaceholder = this.getPlaceholderCard('line');
+        if (canPlaceCardOnLine) {
+            this.line.addCard(linePlaceholder);
+            this.line.getCardElement(linePlaceholder).classList.add('selectable');
+        } else {
+            this.line.removeCard(linePlaceholder);
+        }
+
+        const handPlaceholder = this.getPlaceholderCard('hand');
+        if (canPlaceCardOnHand) {
+            this.hand.addCard(handPlaceholder);
+            this.hand.getCardElement(handPlaceholder).classList.add('selectable');
+        } else {
+            this.hand.removeCard(handPlaceholder);
+        }
+    }
+
+    private getPlaceholderCard(destination: 'hand' | 'line'): Card {
+        const id = destination == 'line' ? -1 : -2;
+        return {
+            id: id,
+            type: 0,
+            number: id,
+        } as Card;
     }
 }

@@ -16,6 +16,10 @@ class CardsManager extends CardManager<Card> {
                         <div class="corner-number right">${card.number}</div>
                         <div class="corner-number rotated">${card.number}</div>
                     `;
+                } else if (card.type == 0) {
+                    div.innerHTML = `
+                        <div class="placeholder-text">${card.number == -1 ? _("Add selected card to line") : _("Add selected card to hand")}</div>
+                    `;
                 }
             },
             setupBackDiv: (card: Card, div: HTMLElement) => {}
