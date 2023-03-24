@@ -1469,6 +1469,9 @@ var LineIt = /** @class */ (function () {
     };
     LineIt.prototype.onEnteringChooseMarketCard = function (args) {
         var _a;
+        if (args.mustClose) {
+            this.setGamestateDescription("Forced");
+        }
         if (this.isCurrentPlayerActive()) {
             this.selectedCardId = null;
             this.tableCenter.setSelectable(true, args.canAddToHand ? null : args.canPlaceOnLine);
@@ -1477,10 +1480,7 @@ var LineIt = /** @class */ (function () {
     };
     LineIt.prototype.onEnteringPlayCard = function (args) {
         var _a;
-        if (args.mustClose) {
-            this.setGamestateDescription("Forced");
-        }
-        else if (args.onlyClose) {
+        if (args.onlyClose) {
             this.setGamestateDescription("OnlyClose");
         }
         if (this.isCurrentPlayerActive()) {
@@ -1513,9 +1513,11 @@ var LineIt = /** @class */ (function () {
                 case 'chooseMarketCard':
                     this.selectedCardId = null;
                     var chooseMarketCardArgs = args;
-                    this.addActionButton("addLine_button", "<div class=\"player-line-card\"></div> " + _("Add selected card to line"), function () { return _this.chooseMarketCardLine(); });
-                    this.addActionButton("addHand_button", "<div class=\"player-hand-card\"></div> " + _("Add selected card to hand"), function () { return _this.chooseMarketCardHand(); });
-                    ["addLine_button", "addHand_button"].forEach(function (id) { return document.getElementById(id).classList.add('disabled'); });
+                    if (!chooseMarketCardArgs.mustClose) {
+                        this.addActionButton("addLine_button", "<div class=\"player-line-card\"></div> " + _("Add selected card to line"), function () { return _this.chooseMarketCardLine(); });
+                        this.addActionButton("addHand_button", "<div class=\"player-hand-card\"></div> " + _("Add selected card to hand"), function () { return _this.chooseMarketCardHand(); });
+                        ["addLine_button", "addHand_button"].forEach(function (id) { return document.getElementById(id).classList.add('disabled'); });
+                    }
                     this.addActionButton("closeLine_button", _("Close the line"), function () { return _this.closeLine(); }, null, null, 'red');
                     if (!chooseMarketCardArgs.canClose) {
                         document.getElementById("closeLine_button").classList.add('disabled');
@@ -1524,9 +1526,6 @@ var LineIt = /** @class */ (function () {
                 case 'playCard':
                     var playCardArgs = args;
                     this.addActionButton("pass_button", _("Pass"), function () { return _this.pass(); });
-                    if (playCardArgs.mustClose) {
-                        document.getElementById("pass_button").classList.add('disabled');
-                    }
                     this.addActionButton("closeLine_button", _("Close the line"), function () { return _this.closeLine(); }, null, null, 'red');
                     if (!playCardArgs.canClose) {
                         document.getElementById("closeLine_button").classList.add('disabled');

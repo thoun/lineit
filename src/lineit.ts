@@ -97,6 +97,9 @@ class LineIt implements LineItGame {
     }
     
     private onEnteringChooseMarketCard(args: EnteringChooseMarketCardArgs) {
+        if (args.mustClose) {
+            this.setGamestateDescription(`Forced`);
+        }
         if ((this as any).isCurrentPlayerActive()) {
             this.selectedCardId = null;
             this.tableCenter.setSelectable(true, args.canAddToHand ? null : args.canPlaceOnLine);
@@ -105,9 +108,7 @@ class LineIt implements LineItGame {
     }
     
     private onEnteringPlayCard(args: EnteringPlayCardArgs) {
-        if (args.mustClose) {
-            this.setGamestateDescription(`Forced`);
-        } else if (args.onlyClose) {
+        if (args.onlyClose) {
             this.setGamestateDescription(`OnlyClose`);
         }
         
@@ -142,9 +143,11 @@ class LineIt implements LineItGame {
                 case 'chooseMarketCard':
                     this.selectedCardId = null;
                     const chooseMarketCardArgs = args as EnteringChooseMarketCardArgs;
-                    (this as any).addActionButton(`addLine_button`, `<div class="player-line-card"></div> ` + _("Add selected card to line"), () => this.chooseMarketCardLine());
-                    (this as any).addActionButton(`addHand_button`, `<div class="player-hand-card"></div> ` + _("Add selected card to hand"), () => this.chooseMarketCardHand());
-                    [`addLine_button`, `addHand_button`].forEach(id => document.getElementById(id).classList.add('disabled'));
+                    if (!chooseMarketCardArgs.mustClose) {
+                        (this as any).addActionButton(`addLine_button`, `<div class="player-line-card"></div> ` + _("Add selected card to line"), () => this.chooseMarketCardLine());
+                        (this as any).addActionButton(`addHand_button`, `<div class="player-hand-card"></div> ` + _("Add selected card to hand"), () => this.chooseMarketCardHand());
+                        [`addLine_button`, `addHand_button`].forEach(id => document.getElementById(id).classList.add('disabled'));
+                    }
 
                     (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
                     if (!chooseMarketCardArgs.canClose) {
@@ -154,9 +157,6 @@ class LineIt implements LineItGame {
                 case 'playCard':
                     const playCardArgs = args as EnteringPlayCardArgs;
                     (this as any).addActionButton(`pass_button`, _("Pass"), () => this.pass());
-                    if (playCardArgs.mustClose) {
-                        document.getElementById(`pass_button`).classList.add('disabled');
-                    }
                     (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
                     if (!playCardArgs.canClose) {
                         document.getElementById(`closeLine_button`).classList.add('disabled');

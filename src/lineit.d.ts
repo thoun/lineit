@@ -54,13 +54,13 @@ interface EnteringChooseMarketCardArgs {
     canPlaceOnLine: Card[];
     canAddToLine: boolean;
     canAddToHand: boolean;
+    mustClose: boolean;
     canClose: boolean;
 }
 
 interface EnteringPlayCardArgs {
     canPlaceOnLine: Card[];
     canClose: boolean;
-    mustClose: boolean;
     onlyClose: boolean;
 }
 

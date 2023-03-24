@@ -27,21 +27,6 @@ trait StateTrait {
         $this->gamestate->nextState('next');
     }
 
-    function stChooseMarketCard() {
-        $args = $this->argChooseMarketCard();
-        if (!$args['canAddToLine'] && !$args['canAddToHand']) {  
-            $playerId = intval($this->getActivePlayerId());
-            $this->setGameStateValue(FORCE_CLOSE, 1);
-
-            self::notifyAllPlayers('log', clienttranslate('${player_name} cannot play a market card or add one to his hand, so he must close the line !'), [
-                'playerId' => $playerId,
-                'player_name' => $this->getPlayerName($playerId),
-            ]);            
-
-            $this->gamestate->nextState('next');
-        }
-    }
-
     function stPlayCard() {
         $args = $this->argPlayCard();
         if (!$args['canClose'] && $args['onlyClose']) { // cannot do anything
@@ -50,8 +35,6 @@ trait StateTrait {
     }
 
     function stNextPlayer() {
-        $this->setGameStateValue(FORCE_CLOSE, 0);
-
         $playerId = intval($this->getActivePlayerId());
 
         $this->giveExtraTime($playerId);

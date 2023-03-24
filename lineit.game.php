@@ -46,7 +46,6 @@ class LineIt extends Table {
         
         self::initGameStateLabels([
             FIRST_PLAYER => FIRST_PLAYER,
-            FORCE_CLOSE => FORCE_CLOSE,
         ]);   
 		
         $this->cards = $this->getNew("module.common.deck");

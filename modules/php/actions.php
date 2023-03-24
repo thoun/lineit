@@ -83,11 +83,19 @@ trait ActionTrait {
         
         $playerId = intval($this->getActivePlayerId());
 
+        $forced = false;
+        if ($this->gamestate->state()['name'] == 'chooseMarketCard') {
+            $args = $this->argChooseMarketCard();
+            if ($args['mustClose']) {
+                $forced = true;
+            }
+        }
+
         $this->applyCloseLine($playerId);
         
-        if (boolval($this->getGameStateValue(FORCE_CLOSE))) {
-            $this->incStat(1, 'closedLines');   
-            $this->incStat(1, 'closedLines', $playerId);   
+        if ($forced) {
+            $this->incStat(1, 'closedLinesForced');   
+            $this->incStat(1, 'closedLinesForced', $playerId);   
         }
 
         $this->gamestate->nextState('stay');

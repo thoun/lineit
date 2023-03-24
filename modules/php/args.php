@@ -17,12 +17,14 @@ trait ArgsTrait {
 
         $market = $this->getCardsByLocation('market');
         $canPlaceOnLine = $this->canPlaceOnLine($playerId, $market);
+        $canAddToLine = count($canPlaceOnLine) > 0;
         $canAddToHand = intval($this->cards->countCardInLocation('hand', $playerId)) < 2;
     
         return [
            'canPlaceOnLine' => $canPlaceOnLine,
-           'canAddToLine' => count($canPlaceOnLine) > 0,
+           'canAddToLine' => $canAddToLine,
            'canAddToHand' => $canAddToHand,
+           'mustClose' => !$canAddToLine && !$canAddToHand,
            'canClose' => intval($this->cards->countCardInLocation('line'.$playerId)) > 0,
         ];
     }
@@ -31,12 +33,10 @@ trait ArgsTrait {
         $playerId = intval($this->getActivePlayerId());
 
         $canPlaceOnLine = $this->canPlaceOnLine($playerId, []);
-        $mustClose = boolval($this->getGameStateValue(FORCE_CLOSE));
     
         return [
            'canPlaceOnLine' => $canPlaceOnLine,
            'canClose' => intval($this->cards->countCardInLocation('line'.$playerId)) > 0,
-           'mustClose' => $mustClose,
            'onlyClose' => count($canPlaceOnLine) == 0,
         ];
     }
