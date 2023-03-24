@@ -1480,8 +1480,8 @@ var LineIt = /** @class */ (function () {
                 case 'chooseMarketCard':
                     this.selectedCardId = null;
                     var chooseMarketCardArgs = args;
-                    this.addActionButton("addLine_button", _("Add selected card to line"), function () { return _this.chooseMarketCardLine(); });
-                    this.addActionButton("addHand_button", _("Add selected card to hand"), function () { return _this.chooseMarketCardHand(); });
+                    this.addActionButton("addLine_button", "<div class=\"player-line-card\"></div> " + _("Add selected card to line"), function () { return _this.chooseMarketCardLine(); });
+                    this.addActionButton("addHand_button", "<div class=\"player-hand-card\"></div> " + _("Add selected card to hand"), function () { return _this.chooseMarketCardHand(); });
                     ["addLine_button", "addHand_button"].forEach(function (id) { return document.getElementById(id).classList.add('disabled'); });
                     this.addActionButton("closeLine_button", _("Close the line"), function () { return _this.closeLine(); }, null, null, 'red');
                     if (!chooseMarketCardArgs.canClose) {

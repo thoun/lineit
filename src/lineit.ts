@@ -141,8 +141,8 @@ class LineIt implements LineItGame {
                 case 'chooseMarketCard':
                     this.selectedCardId = null;
                     const chooseMarketCardArgs = args as EnteringChooseMarketCardArgs;
-                    (this as any).addActionButton(`addLine_button`, _("Add selected card to line"), () => this.chooseMarketCardLine());
-                    (this as any).addActionButton(`addHand_button`, _("Add selected card to hand"), () => this.chooseMarketCardHand());
+                    (this as any).addActionButton(`addLine_button`, `<div class="player-line-card"></div> ` + _("Add selected card to line"), () => this.chooseMarketCardLine());
+                    (this as any).addActionButton(`addHand_button`, `<div class="player-hand-card"></div> ` + _("Add selected card to hand"), () => this.chooseMarketCardHand());
                     [`addLine_button`, `addHand_button`].forEach(id => document.getElementById(id).classList.add('disabled'));
 
                     (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');

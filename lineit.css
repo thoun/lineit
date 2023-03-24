@@ -439,17 +439,6 @@ body > .card {
   margin-right: 5px;
 }
 
-.player-hand-card {
-  display: inline-block;
-  width: 32px;
-  height: 32px;
-  background-image: url("img/cards.svg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  vertical-align: middle;
-}
-
 .player-scored-card {
   display: inline-block;
   width: 32px;
@@ -628,6 +617,28 @@ html, .mode_3d #game_play_area_background {
     flex: 1;
   }
 }
+.player-hand-card {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  background-image: url("img/cards.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  vertical-align: middle;
+}
+
+.player-line-card {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  background-image: url("img/card-line.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  vertical-align: middle;
+}
+
 .log [data-color="1"] {
   color: #ED1B24;
 }
