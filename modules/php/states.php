@@ -18,7 +18,7 @@ trait StateTrait {
         $this->cards->pickCardsForLocation($this->getRoundCardCount(), 'deck', 'market'); 
 
         if (intval($this->getStat('roundNumber')) > 0) { 
-            self::notifyAllPlayers('newMarket', clienttranslate('Marked is refilled'), [
+            self::notifyAllPlayers('newMarket', clienttranslate('Market is refilled'), [
                 'cards' => $this->getCardsByLocation('market'),
                 'deck' => intval($this->cards->countCardInLocation('deck')),
             ]);

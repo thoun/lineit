@@ -1287,7 +1287,7 @@ var TableCenter = /** @class */ (function () {
         this.deckCounter.setValue(gamedatas.deck);
         var html = "";
         for (var i = 1; i <= 4; i++) {
-            html += "\n            <div id=\"jackpot".concat(i, "\" class=\"card-deck\" data-count=\"").concat(gamedatas.jackpots[i].length, "\">\n                <div class=\"jackpot-token\" data-color=\"").concat(i, "\"></div>\n                <span id=\"jackpot").concat(i, "-counter\" class=\"deck-counter\"></span>\n            </div>\n            ");
+            html += "\n            <div id=\"jackpot".concat(i, "\" class=\"card-deck\" data-count=\"").concat(gamedatas.jackpots[i].length, "\" data-color=\"").concat(i, "\">\n                <div class=\"jackpot-token\" data-color=\"").concat(i, "\"></div>\n                <span id=\"jackpot").concat(i, "-counter\" class=\"deck-counter\"></span>\n            </div>\n            ");
         }
         document.getElementById("decks").insertAdjacentHTML('beforeend', html);
         for (var i = 1; i <= 4; i++) {
@@ -1325,7 +1325,12 @@ var TableCenter = /** @class */ (function () {
     };
     TableCenter.prototype.setJackpot = function (color, count) {
         this.jackpotCounters[color].toValue(count);
-        document.getElementById("jackpot".concat(color)).dataset.count = "".concat(count);
+        var deck = document.getElementById("jackpot".concat(color));
+        deck.dataset.count = "".concat(count);
+        deck.classList.remove('jackpot-animation');
+        deck.offsetHeight;
+        deck.classList.add('jackpot-animation');
+        setTimeout(function () { return deck.classList.remove('jackpot-animation'); }, 2100);
     };
     TableCenter.prototype.addJackpotCard = function (card) {
         this.setJackpot(card.color, this.jackpotCounters[card.color].getValue() + 1);
@@ -1672,17 +1677,21 @@ var LineIt = /** @class */ (function () {
         });
     };
     LineIt.prototype.chooseMarketCardLine = function () {
+        var _a;
         if (!this.checkAction('chooseMarketCardLine')) {
             return;
         }
+        (_a = this.getCurrentPlayerTable()) === null || _a === void 0 ? void 0 : _a.addCardsPlaceholders(false, false);
         this.takeAction('chooseMarketCardLine', {
             id: this.selectedCardId,
         });
     };
     LineIt.prototype.chooseMarketCardHand = function () {
+        var _a;
         if (!this.checkAction('chooseMarketCardHand')) {
             return;
         }
+        (_a = this.getCurrentPlayerTable()) === null || _a === void 0 ? void 0 : _a.addCardsPlaceholders(false, false);
         this.takeAction('chooseMarketCardHand', {
             id: this.selectedCardId,
         });
@@ -1731,7 +1740,7 @@ var LineIt = /** @class */ (function () {
             ['discardRemaining', 100],
             ['newFirstPlayer', ANIMATION_MS],
             ['playCard', ANIMATION_MS],
-            ['applyJackpot', ANIMATION_MS],
+            ['applyJackpot', ANIMATION_MS * 4],
             ['betResult', ANIMATION_MS],
             ['closeLine', ANIMATION_MS],
         ];
@@ -1774,8 +1783,10 @@ var LineIt = /** @class */ (function () {
         }
     };
     LineIt.prototype.notif_applyJackpot = function (notif) {
+        var _this = this;
         this.incScored(notif.args.playerId, Number(notif.args.count));
         this.tableCenter.setJackpot(notif.args.color, 0);
+        notif.args.lineColorCard.forEach(function (card) { return _this.cardsManager.getCardElement(card).classList.add('jackpot-animation'); });
     };
     LineIt.prototype.notif_betResult = function (notif) {
         this.addBetToken(notif.args.playerId, notif.args.value);

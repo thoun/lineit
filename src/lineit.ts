@@ -352,6 +352,7 @@ class LineIt implements LineItGame {
         if(!(this as any).checkAction('chooseMarketCardLine')) {
             return;
         }
+        this.getCurrentPlayerTable()?.addCardsPlaceholders(false, false);
 
         this.takeAction('chooseMarketCardLine', {
             id: this.selectedCardId,
@@ -362,6 +363,7 @@ class LineIt implements LineItGame {
         if(!(this as any).checkAction('chooseMarketCardHand')) {
             return;
         }
+        this.getCurrentPlayerTable()?.addCardsPlaceholders(false, false);
 
         this.takeAction('chooseMarketCardHand', {
             id: this.selectedCardId,
@@ -420,7 +422,7 @@ class LineIt implements LineItGame {
             ['discardRemaining', 100],
             ['newFirstPlayer', ANIMATION_MS],
             ['playCard', ANIMATION_MS],
-            ['applyJackpot', ANIMATION_MS],
+            ['applyJackpot', ANIMATION_MS * 4],
             ['betResult', ANIMATION_MS],
             ['closeLine', ANIMATION_MS],
         ];
@@ -476,6 +478,7 @@ class LineIt implements LineItGame {
     notif_applyJackpot(notif: Notif<NotifApplyJackpotArgs>) {
         this.incScored(notif.args.playerId, Number(notif.args.count));
         this.tableCenter.setJackpot(notif.args.color, 0);
+        notif.args.lineColorCard.forEach(card => this.cardsManager.getCardElement(card).classList.add('jackpot-animation'));
     }
 
     notif_betResult(notif: Notif<NotifBetResultArgs>) {

@@ -178,23 +178,25 @@ trait UtilTrait {
 
     function checkJackpot(int $playerId, int $color) {        
         $line = $this->getCardsByLocation('line'.$playerId);
-        $lineColorCards = count(array_filter($line, fn($card) => $card->type == 1 && $card->color == $color));
-        if ($lineColorCards == 3) {
-            $this->applyJackpot($playerId, $color);
+        $lineColorCards = array_values(array_filter($line, fn($card) => $card->type == 1 && $card->color == $color));
+        if (count($lineColorCards) == 3) {
+            $this->applyJackpot($playerId, $color, $lineColorCards);
         }
     }
 
-    function applyJackpot(int $playerId, int $color) {
+    function applyJackpot(int $playerId, int $color, array $lineColorCards) {
         $jackpotCardsCount = intval($this->cards->countCardInLocation('jackpot', $color));
         if ($jackpotCardsCount > 0) {
             $this->cards->moveAllCardsInLocation('jackpot', 'scored', $color, $playerId);            
             self::DbQuery("update player set player_score = player_score + $jackpotCardsCount where `player_id` = $playerId");
         }
-        self::notifyAllPlayers($jackpotCardsCount > 0 ? 'applyJackpot' : 0, clienttranslate('${player_name} adds ${count} card(s) from the jackpot pile to scored cards'), [
+        self::notifyAllPlayers($jackpotCardsCount > 0 ? 'applyJackpot' : 0, clienttranslate('${player_name} adds ${count} card(s) from the ${colorName} jackpot pile to scored cards'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'count' => $jackpotCardsCount,
             'color' => $color,
+            'colorName' => $this->getColorName($color),
+            'lineColorCard' => $lineColorCards,
         ]);
         $this->incStat(1, 'jackpotCollected');   
         $this->incStat(1, 'jackpotCollected', $playerId); 

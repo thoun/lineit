@@ -15,7 +15,7 @@ class TableCenter {
 
         for (let i=1; i<=4; i++) {
             html += `
-            <div id="jackpot${i}" class="card-deck" data-count="${gamedatas.jackpots[i].length}">
+            <div id="jackpot${i}" class="card-deck" data-count="${gamedatas.jackpots[i].length}" data-color="${i}">
                 <div class="jackpot-token" data-color="${i}"></div>
                 <span id="jackpot${i}-counter" class="deck-counter"></span>
             </div>
@@ -65,7 +65,12 @@ class TableCenter {
 
     public setJackpot(color: number, count: number) {
         this.jackpotCounters[color].toValue(count);
-        document.getElementById(`jackpot${color}`).dataset.count = `${count}`;
+        const deck = document.getElementById(`jackpot${color}`);
+        deck.dataset.count = `${count}`;
+        deck.classList.remove('jackpot-animation');
+        deck.offsetHeight;
+        deck.classList.add('jackpot-animation');
+        setTimeout(() => deck.classList.remove('jackpot-animation'), 2100);
     }
     
     public addJackpotCard(card: Card) {

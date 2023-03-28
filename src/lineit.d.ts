@@ -116,4 +116,5 @@ interface NotifApplyJackpotArgs {
     count: number | string;
     removed: number | string;
     color: number;
+    lineColorCard: Card[];
 }

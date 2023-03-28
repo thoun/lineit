@@ -348,6 +348,30 @@ body > .card {
     box-shadow: 0 0 5px 3px #FFFFFF;
   }
 }
+.jackpot-animation {
+  animation: jackpot-animation 2s alternate 1 ease-in-out;
+}
+.jackpot-animation[data-color="1"] {
+  --card-color: #ED1B24;
+}
+.jackpot-animation[data-color="2"] {
+  --card-color: #009BDE;
+}
+.jackpot-animation[data-color="3"] {
+  --card-color: #3AB54A;
+}
+.jackpot-animation[data-color="4"] {
+  --card-color: #FFC30D;
+}
+
+@keyframes jackpot-animation {
+  50% {
+    box-shadow: 0 0 5px 10px var(--card-color);
+  }
+  100% {
+    box-shadow: unset;
+  }
+}
 #table-center {
   font-family: "p22_undergroundheavy";
   display: flex;
