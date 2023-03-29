@@ -238,10 +238,12 @@ trait UtilTrait {
             $this->incStat(1, $statName, $playerId);  
             $this->incStat($tokenNumber, 'pointsFromBet');   
             $this->incStat($tokenNumber, 'pointsFromBet', $playerId);  
+
+            $this->cards->moveCard($betCard->id, 'discard');
         }
 
-        $discardedCards = array_slice($line, 0, 3);
-        $scoredCards = array_slice($line, 3);
+        $discardedCards = array_slice($lineWithoutBet, 0, 3);
+        $scoredCards = array_slice($lineWithoutBet, 3);
 
         if (count($discardedCards) > 0) {
             $this->cards->moveCards(array_map(fn($card) => $card->id, $discardedCards), 'discard');
