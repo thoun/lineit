@@ -28,6 +28,9 @@
 
     #deck {
         margin-right: 20px;
+        background-size: auto 100%;
+        background-image: url('img/cards.jpg');
+        box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.5);
     }
 }
 
@@ -39,9 +42,6 @@
     margin: 5px;
     border-radius: 10px;
     font-family: 'p22_undergroundheavy';
-    background-size: auto 100%;
-    background-image: url('img/cards.jpg');
-    box-shadow: 1px 1px 2px 1px rgba(0, 0, 0, 0.5);
 
     &[data-count="0"] {
         box-shadow: unset;
