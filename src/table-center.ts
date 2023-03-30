@@ -17,7 +17,10 @@ class TableCenter {
             html += `
             <div id="jackpot${i}" class="card-deck" data-count="${gamedatas.jackpots[i].length}" data-color="${i}">
                 <div class="jackpot-token" data-color="${i}"></div>
-                <span id="jackpot${i}-counter" class="deck-counter"></span>
+                <span class="deck-counter">
+                    <span id="jackpot${i}-counter" class="conter"></span>
+                    <span id="jackpot${i}-counter-label">${gamedatas.jackpots[i].length > 1 ? _('pts') : _('pt')}</span>
+                </span>
             </div>
             `;
         }
@@ -66,6 +69,7 @@ class TableCenter {
     public setJackpot(color: number, count: number) {
         this.jackpotCounters[color].toValue(count);
         const deck = document.getElementById(`jackpot${color}`);
+        document.getElementById(`jackpot${color}-counter-label`).innerHTML = count > 1 ? _('pts') : _('pt');
         deck.dataset.count = `${count}`;
         deck.classList.remove('jackpot-animation');
         deck.offsetHeight;

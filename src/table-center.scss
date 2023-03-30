@@ -55,7 +55,11 @@
         right: 0;
         text-align: center;
         text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black, 0 0 4px black, 0 0 5px black, 0 0 6px black;
-        font-size: 30pt;
+        font-size: 24pt;
+
+        .counter {
+            font-size: 30pt;
+        }
     }
 
     .jackpot-token {

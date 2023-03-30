@@ -1287,7 +1287,7 @@ var TableCenter = /** @class */ (function () {
         this.deckCounter.setValue(gamedatas.deck);
         var html = "";
         for (var i = 1; i <= 4; i++) {
-            html += "\n            <div id=\"jackpot".concat(i, "\" class=\"card-deck\" data-count=\"").concat(gamedatas.jackpots[i].length, "\" data-color=\"").concat(i, "\">\n                <div class=\"jackpot-token\" data-color=\"").concat(i, "\"></div>\n                <span id=\"jackpot").concat(i, "-counter\" class=\"deck-counter\"></span>\n            </div>\n            ");
+            html += "\n            <div id=\"jackpot".concat(i, "\" class=\"card-deck\" data-count=\"").concat(gamedatas.jackpots[i].length, "\" data-color=\"").concat(i, "\">\n                <div class=\"jackpot-token\" data-color=\"").concat(i, "\"></div>\n                <span class=\"deck-counter\">\n                    <span id=\"jackpot").concat(i, "-counter\" class=\"conter\"></span>\n                    <span id=\"jackpot").concat(i, "-counter-label\">").concat(gamedatas.jackpots[i].length > 1 ? _('pts') : _('pt'), "</span>\n                </span>\n            </div>\n            ");
         }
         document.getElementById("decks").insertAdjacentHTML('beforeend', html);
         for (var i = 1; i <= 4; i++) {
@@ -1326,6 +1326,7 @@ var TableCenter = /** @class */ (function () {
     TableCenter.prototype.setJackpot = function (color, count) {
         this.jackpotCounters[color].toValue(count);
         var deck = document.getElementById("jackpot".concat(color));
+        document.getElementById("jackpot".concat(color, "-counter-label")).innerHTML = count > 1 ? _('pts') : _('pt');
         deck.dataset.count = "".concat(count);
         deck.classList.remove('jackpot-animation');
         deck.offsetHeight;
@@ -1351,9 +1352,13 @@ var PlayerTable = /** @class */ (function () {
         this.currentPlayer = this.playerId == this.game.getPlayerId();
         var html = "\n        <div id=\"player-table-".concat(this.playerId, "\" class=\"player-table\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"name-wrapper\">").concat(player.name, "</div>\n        ");
         if (this.currentPlayer) {
-            html += "\n            <div class=\"hand-wrapper\">\n                <div class=\"your-hand\">".concat(_('Your hand'), "</div>\n                <div id=\"player-table-").concat(this.playerId, "-hand\" class=\"hand cards\"></div>\n            </div>");
+            html += "\n            <div class=\"block-with-text hand-wrapper\">\n                <div class=\"block-label\">".concat(_('Your hand'), "</div>\n                <div id=\"player-table-").concat(this.playerId, "-hand\" class=\"hand cards\"></div>\n            </div>            \n            <div class=\"block-with-text\">\n                <div class=\"block-label your-line\">").concat(_('Your line'), "</div>");
         }
-        html += "\n            <div id=\"player-table-".concat(this.playerId, "-line\" class=\"line cards\"></div>\n        </div>\n        ");
+        html += "\n                <div id=\"player-table-".concat(this.playerId, "-line\" class=\"line cards\"></div>\n                ");
+        if (this.currentPlayer) {
+            html += "\n            </div>";
+        }
+        html += "\n            </div>\n        </div>\n        ";
         dojo.place(html, document.getElementById('tables'));
         if (this.currentPlayer) {
             this.hand = new LineStock(this.game.cardsManager, document.getElementById("player-table-".concat(this.playerId, "-hand")));
@@ -1523,17 +1528,15 @@ var LineIt = /** @class */ (function () {
                         this.addActionButton("addHand_button", "<div class=\"player-hand-card\"></div> " + _("Add selected card to hand"), function () { return _this.chooseMarketCardHand(); });
                         ["addLine_button", "addHand_button"].forEach(function (id) { return document.getElementById(id).classList.add('disabled'); });
                     }
-                    this.addActionButton("closeLine_button", _("Close the line"), function () { return _this.closeLine(); }, null, null, 'red');
-                    if (!chooseMarketCardArgs.canClose) {
-                        document.getElementById("closeLine_button").classList.add('disabled');
+                    if (chooseMarketCardArgs.canClose) {
+                        this.addActionButton("closeLine_button", _("Close the line"), function () { return _this.closeLine(); }, null, null, 'red');
                     }
                     break;
                 case 'playCard':
                     var playCardArgs = args;
                     this.addActionButton("pass_button", _("Pass"), function () { return _this.pass(); });
-                    this.addActionButton("closeLine_button", _("Close the line"), function () { return _this.closeLine(); }, null, null, 'red');
-                    if (!playCardArgs.canClose) {
-                        document.getElementById("closeLine_button").classList.add('disabled');
+                    if (playCardArgs.canClose) {
+                        this.addActionButton("closeLine_button", _("Close the line"), function () { return _this.closeLine(); }, null, null, 'red');
                     }
                     break;
                 case 'playHandCard':
@@ -1596,7 +1599,7 @@ var LineIt = /** @class */ (function () {
         Object.values(gamedatas.players).forEach(function (player) {
             var playerId = Number(player.id);
             // hand + scored cards counter
-            dojo.place("<div class=\"counters\">\n                <div id=\"playerhand-counter-wrapper-".concat(player.id, "\" class=\"playerhand-counter\">\n                    <div class=\"player-hand-card\"></div> \n                    <span id=\"playerhand-counter-").concat(player.id, "\"></span>\n                </div>\n                <div id=\"scored-counter-wrapper-").concat(player.id, "\" class=\"scored-counter\">\n                    <div class=\"player-scored-card\"></div> \n                    <span id=\"scored-counter-").concat(player.id, "\"></span>\n                </div>\n            </div>"), "player_board_".concat(player.id));
+            dojo.place("<div class=\"counters\">\n                <div id=\"playerhand-counter-wrapper-".concat(player.id, "\" class=\"playerhand-counter\">\n                    <div class=\"player-hand-card\"></div> \n                    <span id=\"playerhand-counter-").concat(player.id, "\"></span> / 2\n                </div>\n                <div id=\"scored-counter-wrapper-").concat(player.id, "\" class=\"scored-counter\">\n                    <div class=\"player-scored-card\"></div> \n                    <span id=\"scored-counter-").concat(player.id, "\"></span>\n                </div>\n            </div>"), "player_board_".concat(player.id));
             var handCounter = new ebg.counter();
             handCounter.create("playerhand-counter-".concat(playerId));
             handCounter.setValue(player.hand.length);

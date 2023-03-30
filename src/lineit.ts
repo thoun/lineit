@@ -149,17 +149,15 @@ class LineIt implements LineItGame {
                         [`addLine_button`, `addHand_button`].forEach(id => document.getElementById(id).classList.add('disabled'));
                     }
 
-                    (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
-                    if (!chooseMarketCardArgs.canClose) {
-                        document.getElementById(`closeLine_button`).classList.add('disabled');
+                    if (chooseMarketCardArgs.canClose) {
+                        (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
                     }
                     break;
                 case 'playCard':
                     const playCardArgs = args as EnteringPlayCardArgs;
                     (this as any).addActionButton(`pass_button`, _("Pass"), () => this.pass());
-                    (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
-                    if (!playCardArgs.canClose) {
-                        document.getElementById(`closeLine_button`).classList.add('disabled');
+                    if (playCardArgs.canClose) {
+                        (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
                     }
                     break;
                 case 'playHandCard':
@@ -240,7 +238,7 @@ class LineIt implements LineItGame {
             dojo.place(`<div class="counters">
                 <div id="playerhand-counter-wrapper-${player.id}" class="playerhand-counter">
                     <div class="player-hand-card"></div> 
-                    <span id="playerhand-counter-${player.id}"></span>
+                    <span id="playerhand-counter-${player.id}"></span> / 2
                 </div>
                 <div id="scored-counter-wrapper-${player.id}" class="scored-counter">
                     <div class="player-scored-card"></div> 

@@ -426,6 +426,9 @@ body > .card {
   right: 0;
   text-align: center;
   text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black, 0 0 4px black, 0 0 5px black, 0 0 6px black;
+  font-size: 24pt;
+}
+.card-deck .deck-counter .counter {
   font-size: 30pt;
 }
 .card-deck .jackpot-token {
@@ -552,13 +555,10 @@ body > .card {
   align-items: center;
   font-size: 20pt;
 }
-.player-table .hand-wrapper {
+.player-table .block-with-text {
   display: flex;
-  margin: 5px;
-  background: rgba(255, 255, 255, 0.5333333333);
-  border-radius: 10px;
 }
-.player-table .hand-wrapper .your-hand {
+.player-table .block-with-text .block-label {
   text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black, 0 0 4px black;
   text-align: center;
   writing-mode: vertical-lr;
@@ -566,8 +566,16 @@ body > .card {
   padding: 5px;
   text-overflow: ellipsis;
 }
-.player-table .hand-wrapper .hand {
+.player-table .block-with-text .block-label.your-line {
+  margin-left: 5px;
+}
+.player-table .block-with-text > div:not(.block-label) {
   flex: 1;
+}
+.player-table .hand-wrapper {
+  margin: 5px;
+  background: rgba(255, 255, 255, 0.5333333333);
+  border-radius: 10px;
 }
 .player-table .cards {
   min-height: 152px;
@@ -652,7 +660,7 @@ html, .mode_3d #game_play_area_background {
   display: inline-block;
   width: 32px;
   height: 32px;
-  background-image: url("img/cards.svg");
+  background-image: url("img/hand.svg");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;

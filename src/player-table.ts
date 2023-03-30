@@ -18,13 +18,22 @@ class PlayerTable {
         `;
         if (this.currentPlayer) {
             html += `
-            <div class="hand-wrapper">
-                <div class="your-hand">${_('Your hand')}</div>
+            <div class="block-with-text hand-wrapper">
+                <div class="block-label">${_('Your hand')}</div>
                 <div id="player-table-${this.playerId}-hand" class="hand cards"></div>
+            </div>            
+            <div class="block-with-text">
+                <div class="block-label your-line">${_('Your line')}</div>`;
+        }
+        html += `
+                <div id="player-table-${this.playerId}-line" class="line cards"></div>
+                `;
+        if (this.currentPlayer) {
+            html += `
             </div>`;
         }
         html += `
-            <div id="player-table-${this.playerId}-line" class="line cards"></div>
+            </div>
         </div>
         `;
         dojo.place(html, document.getElementById('tables'));
