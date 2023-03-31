@@ -1,3 +1,13 @@
+
+@font-face {
+    font-family: 'line-it-numbers';
+    src: url('img/line_it_numbers-webfont.woff2') format('woff2'),
+         url('img/line_it_numbers-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
 .card {
     display: inline-block;
     position: relative;
@@ -28,18 +38,19 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                font-size: 55pt;
                 text-align: center;
 
                 .center-number {
-                    padding-top: 10px;
+                    font-size: 46pt;
+                    font-family: 'line-it-numbers';
                 }
 
                 .corner-number {
+                    font-family: 'line-it-numbers';
                     position: absolute;
                     width: 25px;
                     color: white;
-                    font-size: 13pt;
+                    font-size: 12pt;
 
                     &.left {
                         top: 5px;
@@ -106,7 +117,7 @@
     }
 
     &[data-number="100"] .front .center-number {
-        font-size: 45pt;
+        font-size: 40pt;
     }
 }
 
