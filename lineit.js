@@ -1534,7 +1534,7 @@ var LineIt = /** @class */ (function () {
                     break;
                 case 'playCard':
                     var playCardArgs = args;
-                    this.addActionButton("pass_button", _("Pass"), function () { return _this.pass(); });
+                    this.addActionButton("pass_button", _("End turn"), function () { return _this.pass(); });
                     if (playCardArgs.canClose) {
                         this.addActionButton("closeLine_button", _("Close the line"), function () { return _this.closeLine(); }, null, null, 'red');
                     }

@@ -155,7 +155,7 @@ class LineIt implements LineItGame {
                     break;
                 case 'playCard':
                     const playCardArgs = args as EnteringPlayCardArgs;
-                    (this as any).addActionButton(`pass_button`, _("Pass"), () => this.pass());
+                    (this as any).addActionButton(`pass_button`, _("End turn"), () => this.pass());
                     if (playCardArgs.canClose) {
                         (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
                     }
