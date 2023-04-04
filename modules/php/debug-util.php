@@ -11,8 +11,8 @@ trait DebugUtilTrait {
             return;
         } 
 
-        $this->debugSetCardInLine(2343492, 2, 3);
-        $this->debugSetCardInHand(2343492, 2, 5);
+        //$this->debugSetCardInLine(2343492, 2, 3);
+        //$this->debugSetCardInHand(2343492, 2, 5);
         
         //$this->debugLastTurn();
     }
