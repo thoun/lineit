@@ -181,7 +181,7 @@ class LineIt extends Table {
         (see states.inc.php)
     */
     function getGameProgression() {
-        return intval($this->cards->countCardInLocation('deck'));
+        return (106 - intval($this->cards->countCardInLocation('deck'))) * 100 / 106;
     }
 
 //////////////////////////////////////////////////////////////////////////////

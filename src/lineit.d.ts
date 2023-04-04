@@ -39,6 +39,7 @@ interface LineItGamedatas {
 }
 
 interface LineItGame extends Game {
+    animationManager: AnimationManager;
     cardsManager: CardsManager;
 
     getPlayerId(): number;

@@ -11,10 +11,10 @@ const ACTION_TIMER_DURATION = 5;
 const LOCAL_STORAGE_ZOOM_KEY = 'LineIt-zoom';
 
 class LineIt implements LineItGame {
+    public animationManager: AnimationManager;
     public cardsManager: CardsManager;
 
     private zoomManager: ZoomManager;
-    private animationManager: AnimationManager;
     private gamedatas: LineItGamedatas;
     private tableCenter: TableCenter;
     private playersTables: PlayerTable[] = [];
@@ -47,8 +47,8 @@ class LineIt implements LineItGame {
 
         log('gamedatas', gamedatas);
 
-        this.cardsManager = new CardsManager(this);
         this.animationManager = new AnimationManager(this);
+        this.cardsManager = new CardsManager(this);
         this.tableCenter = new TableCenter(this, gamedatas);
         this.createPlayerPanels(gamedatas);
         this.createPlayerTables(gamedatas);
