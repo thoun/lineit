@@ -1493,12 +1493,15 @@ var LineIt = /** @class */ (function () {
                 case 'playCard':
                     var playCardArgs = args;
                     this.addActionButton("pass_button", _("End turn"), function () { return _this.pass(); });
+                    if (this.startActionTimer('pass_button', 6)) {
+                        this.addActionButton('stopActionTimer_button', _("Let me think!"), function () { return _this.stopActionTimer('pass_button'); });
+                    }
                     if (playCardArgs.canClose) {
                         this.addActionButton("closeLine_button", _("Close the line"), function () { return _this.closeLine(); }, null, null, 'red');
                     }
                     break;
                 case 'playHandCard':
-                    this.addActionButton("pass_button", _("Pass"), function () { return _this.pass(); });
+                    this.addActionButton("pass_end_button", _("Pass"), function () { return _this.pass(); });
                     break;
             }
         }
@@ -1628,6 +1631,42 @@ var LineIt = /** @class */ (function () {
         if (card.id < 0) {
             this.chooseMarketCardLine();
         }
+    };
+    LineIt.prototype.startActionTimer = function (buttonId, time) {
+        var _this = this;
+        var _a;
+        if (Number((_a = this.prefs[201]) === null || _a === void 0 ? void 0 : _a.value) == 2) {
+            return false;
+        }
+        var button = document.getElementById(buttonId);
+        this.actionTimerId = null;
+        button.dataset.label = button.innerHTML;
+        var _actionTimerSeconds = time;
+        var actionTimerFunction = function () {
+            var button = document.getElementById(buttonId);
+            if (button == null) {
+                window.clearInterval(_this.actionTimerId);
+            }
+            else if (_actionTimerSeconds-- > 1) {
+                button.innerHTML = button.dataset.label + ' (' + _actionTimerSeconds + ')';
+            }
+            else {
+                if (_this.actionTimerId !== null) {
+                    window.clearInterval(_this.actionTimerId);
+                    button.click();
+                }
+            }
+        };
+        actionTimerFunction();
+        this.actionTimerId = window.setInterval(function () { return actionTimerFunction(); }, 1000);
+        return true;
+    };
+    LineIt.prototype.stopActionTimer = function (buttonId) {
+        var button = document.getElementById(buttonId);
+        button.innerHTML = button.dataset.label;
+        window.clearInterval(this.actionTimerId);
+        //this.actionTimerId = null;
+        dojo.destroy('stopActionTimer_button');
     };
     LineIt.prototype.playCardFromHand = function (id) {
         if (!this.checkAction('playCardFromHand')) {

@@ -24,6 +24,19 @@
  *
  */
 
-$game_options = [];
+$game_options = [
+];
+    
+$game_preferences = [
+    201 => [
+        'name' => totranslate('Countdown timer for End turn button'),
+        'needReload' => false,
+        'values' => [
+            1 => ['name' => totranslate('Enabled')],
+            2 => ['name' => totranslate('Disabled')],
+        ],
+        'default' => 1
+    ],
+];
 
 

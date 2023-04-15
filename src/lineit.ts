@@ -21,6 +21,7 @@ class LineIt implements LineItGame {
     private handCounters: Counter[] = [];
     private scoredCounters: Counter[] = [];
     private selectedCardId: number;
+    private actionTimerId: number;
     
     private TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
 
@@ -156,12 +157,15 @@ class LineIt implements LineItGame {
                 case 'playCard':
                     const playCardArgs = args as EnteringPlayCardArgs;
                     (this as any).addActionButton(`pass_button`, _("End turn"), () => this.pass());
+                    if (this.startActionTimer('pass_button', 6)) {
+                        (this as any).addActionButton('stopActionTimer_button', _("Let me think!"), () => this.stopActionTimer('pass_button'));
+                    }
                     if (playCardArgs.canClose) {
                         (this as any).addActionButton(`closeLine_button`, _("Close the line"), () => this.closeLine(), null, null, 'red');
                     }
                     break;
                 case 'playHandCard':
-                    (this as any).addActionButton(`pass_button`, _("Pass"), () => this.pass());
+                    (this as any).addActionButton(`pass_end_button`, _("Pass"), () => this.pass());
                     break;
             }
         }
@@ -334,6 +338,42 @@ class LineIt implements LineItGame {
         if (card.id < 0) {
             this.chooseMarketCardLine();
         }
+    }
+
+    private startActionTimer(buttonId: string, time: number): boolean {
+        if (Number((this as any).prefs[201]?.value) == 2) {
+            return false;
+        }
+
+        const button = document.getElementById(buttonId);
+ 
+        this.actionTimerId = null;
+        button.dataset.label = button.innerHTML;
+        let _actionTimerSeconds = time;
+        const actionTimerFunction = () => {
+            const button = document.getElementById(buttonId);
+            if (button == null) {
+                window.clearInterval(this.actionTimerId);
+            } else if (_actionTimerSeconds-- > 1) {
+                button.innerHTML = button.dataset.label + ' (' + _actionTimerSeconds + ')';
+            } else {
+                if (this.actionTimerId !== null) {
+                    window.clearInterval(this.actionTimerId);
+                    button.click();
+                }
+            }
+        };
+        actionTimerFunction();
+        this.actionTimerId = window.setInterval(() => actionTimerFunction(), 1000);
+        return true;
+    }
+
+    private stopActionTimer(buttonId: string) {
+        const button = document.getElementById(buttonId);
+        button.innerHTML = button.dataset.label;
+        window.clearInterval(this.actionTimerId);
+        //this.actionTimerId = null;
+        dojo.destroy('stopActionTimer_button');
     }
   	
     public playCardFromHand(id: number) {
