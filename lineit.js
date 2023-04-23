@@ -1376,6 +1376,7 @@ var LineIt = /** @class */ (function () {
         this.playersTables = [];
         this.handCounters = [];
         this.scoredCounters = [];
+        this.actionTimerIds = [];
         this.TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
     }
     /*
@@ -1633,39 +1634,37 @@ var LineIt = /** @class */ (function () {
         }
     };
     LineIt.prototype.startActionTimer = function (buttonId, time) {
-        var _this = this;
         var _a;
         if (Number((_a = this.prefs[201]) === null || _a === void 0 ? void 0 : _a.value) == 2) {
             return false;
         }
         var button = document.getElementById(buttonId);
-        this.actionTimerId = null;
         button.dataset.label = button.innerHTML;
-        var _actionTimerSeconds = time;
-        var actionTimerFunction = function () {
-            var button = document.getElementById(buttonId);
-            if (button == null) {
-                window.clearInterval(_this.actionTimerId);
-            }
-            else if (_actionTimerSeconds-- > 1) {
-                button.innerHTML = button.dataset.label + ' (' + _actionTimerSeconds + ')';
-            }
-            else {
-                if (_this.actionTimerId !== null) {
-                    window.clearInterval(_this.actionTimerId);
-                    button.click();
-                }
-            }
-        };
-        actionTimerFunction();
-        this.actionTimerId = window.setInterval(function () { return actionTimerFunction(); }, 1000);
+        this.actionTimerFunction(buttonId, time);
         return true;
     };
+    LineIt.prototype.actionTimerFunction = function (buttonId, seconds) {
+        var _this = this;
+        var button = document.getElementById(buttonId);
+        if (button == null) {
+            return;
+        }
+        if (seconds > 0) {
+            button.innerHTML = "".concat(button.dataset.label, " (").concat(seconds, ")");
+            window.clearTimeout(this.actionTimerIds[buttonId]);
+            this.actionTimerIds[buttonId] = setTimeout(function () { return _this.actionTimerFunction(buttonId, seconds - 1); }, 1000);
+        }
+        else {
+            window.clearTimeout(this.actionTimerIds[buttonId]);
+            button.click();
+        }
+    };
+    ;
     LineIt.prototype.stopActionTimer = function (buttonId) {
+        window.clearTimeout(this.actionTimerIds[buttonId]);
+        this.actionTimerIds[buttonId] = null;
         var button = document.getElementById(buttonId);
         button.innerHTML = button.dataset.label;
-        window.clearInterval(this.actionTimerId);
-        //this.actionTimerId = null;
         dojo.destroy('stopActionTimer_button');
     };
     LineIt.prototype.playCardFromHand = function (id) {
@@ -1699,6 +1698,7 @@ var LineIt = /** @class */ (function () {
     LineIt.prototype.closeLine = function (confirmed) {
         var _this = this;
         if (confirmed === void 0) { confirmed = false; }
+        this.stopActionTimer('pass_button');
         if (!confirmed && !this.gamedatas.gamestate.args.mustClose) {
             this.confirmationDialog(_("Are you sure you want to close this line ?"), function () { return _this.closeLine(true); });
             return;

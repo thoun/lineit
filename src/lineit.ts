@@ -21,7 +21,7 @@ class LineIt implements LineItGame {
     private handCounters: Counter[] = [];
     private scoredCounters: Counter[] = [];
     private selectedCardId: number;
-    private actionTimerId: number;
+    private actionTimerIds: number[] = [];
     
     private TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
 
@@ -347,32 +347,32 @@ class LineIt implements LineItGame {
 
         const button = document.getElementById(buttonId);
  
-        this.actionTimerId = null;
         button.dataset.label = button.innerHTML;
-        let _actionTimerSeconds = time;
-        const actionTimerFunction = () => {
-            const button = document.getElementById(buttonId);
-            if (button == null) {
-                window.clearInterval(this.actionTimerId);
-            } else if (_actionTimerSeconds-- > 1) {
-                button.innerHTML = button.dataset.label + ' (' + _actionTimerSeconds + ')';
-            } else {
-                if (this.actionTimerId !== null) {
-                    window.clearInterval(this.actionTimerId);
-                    button.click();
-                }
-            }
-        };
-        actionTimerFunction();
-        this.actionTimerId = window.setInterval(() => actionTimerFunction(), 1000);
+        this.actionTimerFunction(buttonId, time);
         return true;
     }
 
+    private actionTimerFunction(buttonId: string, seconds: number) {
+        const button = document.getElementById(buttonId);
+        if (button == null) {
+            return;
+        }
+
+        if (seconds > 0) {
+            button.innerHTML = `${button.dataset.label} (${seconds})`;
+            window.clearTimeout(this.actionTimerIds[buttonId]);
+            this.actionTimerIds[buttonId] = setTimeout(() => this.actionTimerFunction(buttonId, seconds - 1), 1000);
+        } else {
+            window.clearTimeout(this.actionTimerIds[buttonId]);
+            button.click();
+        }
+    };
+
     private stopActionTimer(buttonId: string) {
+        window.clearTimeout(this.actionTimerIds[buttonId]);
+        this.actionTimerIds[buttonId] = null;
         const button = document.getElementById(buttonId);
         button.innerHTML = button.dataset.label;
-        window.clearInterval(this.actionTimerId);
-        //this.actionTimerId = null;
         dojo.destroy('stopActionTimer_button');
     }
   	
@@ -409,6 +409,8 @@ class LineIt implements LineItGame {
     }
   	
     public closeLine(confirmed: boolean = false) {
+        this.stopActionTimer('pass_button');
+
         if (!confirmed && !this.gamedatas.gamestate.args.mustClose) {
             (this as any).confirmationDialog(
                 _("Are you sure you want to close this line ?"), 
