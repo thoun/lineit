@@ -372,7 +372,9 @@ class LineIt implements LineItGame {
         window.clearTimeout(this.actionTimerIds[buttonId]);
         this.actionTimerIds[buttonId] = null;
         const button = document.getElementById(buttonId);
-        button.innerHTML = button.dataset.label;
+        if (button?.dataset.label) {
+            button.innerHTML = button.dataset.label;
+        }
         dojo.destroy('stopActionTimer_button');
     }
   	
@@ -409,7 +411,9 @@ class LineIt implements LineItGame {
     }
   	
     public closeLine(confirmed: boolean = false) {
-        this.stopActionTimer('pass_button');
+        try {
+            this.stopActionTimer('pass_button');
+        } catch (e) {}
 
         if (!confirmed && !this.gamedatas.gamestate.args.mustClose) {
             (this as any).confirmationDialog(

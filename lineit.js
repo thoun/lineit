@@ -1664,7 +1664,9 @@ var LineIt = /** @class */ (function () {
         window.clearTimeout(this.actionTimerIds[buttonId]);
         this.actionTimerIds[buttonId] = null;
         var button = document.getElementById(buttonId);
-        button.innerHTML = button.dataset.label;
+        if (button === null || button === void 0 ? void 0 : button.dataset.label) {
+            button.innerHTML = button.dataset.label;
+        }
         dojo.destroy('stopActionTimer_button');
     };
     LineIt.prototype.playCardFromHand = function (id) {
@@ -1698,7 +1700,10 @@ var LineIt = /** @class */ (function () {
     LineIt.prototype.closeLine = function (confirmed) {
         var _this = this;
         if (confirmed === void 0) { confirmed = false; }
-        this.stopActionTimer('pass_button');
+        try {
+            this.stopActionTimer('pass_button');
+        }
+        catch (e) { }
         if (!confirmed && !this.gamedatas.gamestate.args.mustClose) {
             this.confirmationDialog(_("Are you sure you want to close this line ?"), function () { return _this.closeLine(true); });
             return;
