@@ -18,7 +18,7 @@ class TableCenter {
             <div id="jackpot${i}" class="card-deck" data-count="${gamedatas.jackpots[i].length}" data-color="${i}">
                 <div class="jackpot-token" data-color="${i}"></div>
                 <span class="deck-counter">
-                    <span id="jackpot${i}-counter" class="conter"></span>
+                    <span id="jackpot${i}-counter" class="counter"></span>
                     <span id="jackpot${i}-counter-label">${gamedatas.jackpots[i].length > 1 ? _('pts') : _('pt')}</span>
                 </span>
             </div>

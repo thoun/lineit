@@ -23,7 +23,8 @@ class CardsManager extends CardManager<Card> {
                     `;
                 }
             },
-            setupBackDiv: (card: Card, div: HTMLElement) => {}
+            setupBackDiv: (card: Card, div: HTMLElement) => {},
+            isCardVisible: (card) => card.type > 0 || card.number < 0,
         });
     }
 }

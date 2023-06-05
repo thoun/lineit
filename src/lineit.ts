@@ -504,10 +504,11 @@ class LineIt implements LineItGame {
         const destinationId = `first-player-token-wrapper-${notif.args.playerId}`;
         const originId = firstPlayerToken.parentElement.id;
         if (destinationId !== originId) {
-            this.animationManager.attachWithSlideAnimation(
-                firstPlayerToken,
-                document.getElementById(destinationId),
-                { zoom: 1 },
+            this.animationManager.attachWithAnimation(new BgaSlideAnimation({
+                element:  firstPlayerToken,
+                zoom: 1,
+            }),
+            document.getElementById(destinationId),
             );
         }
     }
