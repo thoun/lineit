@@ -66,7 +66,7 @@ $commonStats = [
     ],
     "marketToLine" => [
         "id" => 21,
-        "name" => totranslate("Market cards added to hand"),
+        "name" => totranslate("Market cards added to line"),
         "type" => "int"
     ],
     "playedCardFromHand" => [
