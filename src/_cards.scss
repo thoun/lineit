@@ -17,7 +17,7 @@
     border-radius: 10px;
     font-family: 'p22_undergroundheavy';
 
-    &.disabled {
+    &.bga-cards_disabled-card {
       cursor: not-allowed;
       filter: contrast(0.6);
     }
@@ -72,9 +72,9 @@
         }
     }    
 
-    &.selectable:not(.disabled) {
+    &.bga-cards_selectable-card:not(.bga-cards_disabled-card) {
         cursor: pointer;
-        &:not(.selected) {
+        &:not(.bga-cards_selected-card) {
             animation: selectable-card-animation 1s alternate infinite ease-in-out;
         }
 
@@ -83,7 +83,7 @@
         }
     }    
 
-    &.selected:not(.disabled) {
+    &.bga-cards_selected-card:not(.bga-cards_disabled-card) {
         box-shadow: 0 0 5px 8px #e273f5;
 
         .card-side {

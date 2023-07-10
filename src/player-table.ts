@@ -58,8 +58,8 @@ class PlayerTable {
         this.hand.getCards().forEach(card => {
             const element = this.hand.getCardElement(card);
             const disabled = selectable && selectableCards != null && !selectableCards.some(s => s.id == card.id);
-            element.classList.toggle('disabled', disabled);
-            element.classList.toggle('selectable', selectable && !disabled);
+            element.classList.toggle('bga-cards_disabled-card', disabled);
+            element.classList.toggle('bga-cards_selectable-card', selectable && !disabled);
         });
     }
     
@@ -67,7 +67,7 @@ class PlayerTable {
         const linePlaceholder = this.getPlaceholderCard('line');
         if (canPlaceCardOnLine) {
             this.line.addCard(linePlaceholder);
-            this.line.getCardElement(linePlaceholder).classList.add('selectable');
+            this.line.getCardElement(linePlaceholder).classList.add('bga-cards_selectable-card');
         } else {
             this.line.removeCard(linePlaceholder);
         }
@@ -75,7 +75,7 @@ class PlayerTable {
         const handPlaceholder = this.getPlaceholderCard('hand');
         if (canPlaceCardOnHand) {
             this.hand.addCard(handPlaceholder);
-            this.hand.getCardElement(handPlaceholder).classList.add('selectable');
+            this.hand.getCardElement(handPlaceholder).classList.add('bga-cards_selectable-card');
         } else {
             this.hand.removeCard(handPlaceholder);
         }

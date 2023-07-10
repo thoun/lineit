@@ -1519,8 +1519,8 @@ var TableCenter = /** @class */ (function () {
         this.market.getCards().forEach(function (card) {
             var element = _this.market.getCardElement(card);
             var disabled = selectable && selectableCards != null && !selectableCards.some(function (s) { return s.id == card.id; });
-            element.classList.toggle('disabled', disabled);
-            element.classList.toggle('selectable', selectable && !disabled);
+            element.classList.toggle('bga-cards_disabled-card', disabled);
+            element.classList.toggle('bga-cards_selectable-card', selectable && !disabled);
         });
     };
     TableCenter.prototype.newMarket = function (cards) {
@@ -1589,15 +1589,15 @@ var PlayerTable = /** @class */ (function () {
         this.hand.getCards().forEach(function (card) {
             var element = _this.hand.getCardElement(card);
             var disabled = selectable && selectableCards != null && !selectableCards.some(function (s) { return s.id == card.id; });
-            element.classList.toggle('disabled', disabled);
-            element.classList.toggle('selectable', selectable && !disabled);
+            element.classList.toggle('bga-cards_disabled-card', disabled);
+            element.classList.toggle('bga-cards_selectable-card', selectable && !disabled);
         });
     };
     PlayerTable.prototype.addCardsPlaceholders = function (canPlaceCardOnLine, canPlaceCardOnHand) {
         var linePlaceholder = this.getPlaceholderCard('line');
         if (canPlaceCardOnLine) {
             this.line.addCard(linePlaceholder);
-            this.line.getCardElement(linePlaceholder).classList.add('selectable');
+            this.line.getCardElement(linePlaceholder).classList.add('bga-cards_selectable-card');
         }
         else {
             this.line.removeCard(linePlaceholder);
@@ -1605,7 +1605,7 @@ var PlayerTable = /** @class */ (function () {
         var handPlaceholder = this.getPlaceholderCard('hand');
         if (canPlaceCardOnHand) {
             this.hand.addCard(handPlaceholder);
-            this.hand.getCardElement(handPlaceholder).classList.add('selectable');
+            this.hand.getCardElement(handPlaceholder).classList.add('bga-cards_selectable-card');
         }
         else {
             this.hand.removeCard(handPlaceholder);

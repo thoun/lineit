@@ -112,12 +112,13 @@ body > .card {
   user-select: none;
 }
 
-.card-stock.selectable .card:not(.disabled) {
+.card-stock .card.bga-cards_selectable-card:not(.bga-cards_disabled-card) {
   cursor: pointer;
 }
 
-.card-stock .card.selectable:not(.disabled) {
-  cursor: pointer;
+.card-stock .card.bga-cards_disabled-card {
+  cursor: not-allowed;
+  filter: contrast(0.6);
 }
 
 .card-stock.line-stock {
@@ -216,6 +217,43 @@ body > .card {
   visibility: hidden;
 }
 
+.card-stock.deck[data-empty=true] .bga-cards_deck-counter.hide-when-empty {
+  display: none;
+}
+
+.bga-cards_deck-counter {
+  --bga-cards-deck-counter-size: 20px;
+  position: absolute;
+  z-index: 1;
+  width: var(--bga-cards-deck-counter-size);
+  height: var(--bga-cards-deck-counter-size);
+  left: calc(var(--bga-cards-deck-left) - var(--bga-cards-deck-counter-size) / 2);
+  top: calc(var(--bga-cards-deck-top) - var(--bga-cards-deck-counter-size) / 2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+.bga-cards_deck-counter.round {
+  color: black;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 0 2px 1px black;
+  font-size: 14px;
+}
+
+.bga-cards_deck-counter.text-shadow {
+  color: white;
+  text-shadow: 0 0 1px black, 0 0 2px black, 0 0 3px black, 0 0 4px black;
+  font-size: 20px;
+}
+
+.bga-cards_deck-counter.hidden {
+  display: none;
+}
+
 .card-stock.all-visible-deck {
   position: absolute;
   --tile-count: 1;
@@ -256,7 +294,7 @@ body > .card {
   border-radius: 10px;
   font-family: "p22_undergroundheavy";
 }
-.card.disabled {
+.card.bga-cards_disabled-card {
   cursor: not-allowed;
   filter: contrast(0.6);
 }
@@ -300,19 +338,19 @@ body > .card {
   bottom: 5px;
   right: 5px;
 }
-.card.selectable:not(.disabled) {
+.card.bga-cards_selectable-card:not(.bga-cards_disabled-card) {
   cursor: pointer;
 }
-.card.selectable:not(.disabled):not(.selected) {
+.card.bga-cards_selectable-card:not(.bga-cards_disabled-card):not(.bga-cards_selected-card) {
   animation: selectable-card-animation 1s alternate infinite ease-in-out;
 }
-.card.selectable:not(.disabled) .card-side {
+.card.bga-cards_selectable-card:not(.bga-cards_disabled-card) .card-side {
   box-shadow: unset;
 }
-.card.selected:not(.disabled) {
+.card.bga-cards_selected-card:not(.bga-cards_disabled-card) {
   box-shadow: 0 0 5px 8px #e273f5;
 }
-.card.selected:not(.disabled) .card-side {
+.card.bga-cards_selected-card:not(.bga-cards_disabled-card) .card-side {
   box-shadow: unset;
 }
 .card[data-type="0"] .front {
@@ -605,34 +643,6 @@ html, .mode_3d #game_play_area_background {
   background: url("img/background.jpg");
   background-position: top center;
   background-repeat: repeat;
-}
-
-#zoom-wrapper {
-  position: relative;
-}
-#zoom-wrapper #zoom-controls {
-  position: absolute;
-  top: 0;
-  right: 0;
-}
-#zoom-wrapper #zoom-controls button {
-  width: 40px;
-  height: 40px;
-  background: url("img/zoom.svg");
-  background-size: auto 220%;
-}
-#zoom-wrapper #zoom-controls button:not(.disabled) {
-  cursor: pointer;
-}
-#zoom-wrapper #zoom-controls button.disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-#zoom-wrapper #zoom-controls #zoom-in {
-  background-position: 6% 94%;
-}
-#zoom-wrapper #zoom-controls #zoom-out {
-  background-position: 82% 94%;
 }
 
 #tables-and-center {

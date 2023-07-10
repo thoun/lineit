@@ -48,8 +48,8 @@ class TableCenter {
         this.market.getCards().forEach(card => {
             const element = this.market.getCardElement(card);
             const disabled = selectable && selectableCards != null && !selectableCards.some(s => s.id == card.id);
-            element.classList.toggle('disabled', disabled);
-            element.classList.toggle('selectable', selectable && !disabled);
+            element.classList.toggle('bga-cards_disabled-card', disabled);
+            element.classList.toggle('bga-cards_selectable-card', selectable && !disabled);
         });
     }
 

@@ -28,39 +28,6 @@ html, .mode_3d #game_play_area_background {
   background-repeat: repeat;
 }
 
-#zoom-wrapper {
-  position: relative;
-
-  #zoom-controls {
-    position: absolute;
-    top: 0;
-    right: 0;
-
-    button {
-      width: 40px;
-      height: 40px;
-      background: url('img/zoom.svg');
-      background-size: auto 220%;
-
-      &:not(.disabled) {
-        cursor: pointer;
-      }
-
-      &.disabled {
-        cursor: not-allowed;
-        opacity: 0.5;
-      }
-    }
-
-    #zoom-in {
-      background-position: 6% 94%;
-    }
-    #zoom-out {
-      background-position: 82% 94%;
-    }
-  }
-}
-
 #tables-and-center {
   position: relative;
   display: flex;
