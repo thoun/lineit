@@ -16,8 +16,9 @@
   *
   */
 
-
-require_once(APP_GAMEMODULE_PATH.'module/table/table.game.php');
+use Bga\GameFramework\Components\Deck;
+use Bga\GameFramework\Table;
+use Bga\GameFramework\VisibleSystemException;
 
 require_once('modules/php/objects/card.php');
 require_once('modules/php/objects/player.php');
@@ -35,6 +36,8 @@ class LineIt extends Table {
     use ArgsTrait;
     use DebugUtilTrait;
 
+    public Deck $cards;
+
 	function __construct() {
         // Your global variables labels:
         //  Here, you can assign labels to global variables you are using for this game.
@@ -48,15 +51,9 @@ class LineIt extends Table {
             FIRST_PLAYER => FIRST_PLAYER,
         ]);   
 		
-        $this->cards = $this->getNew("module.common.deck");
-        $this->cards->init("card");
+        $this->cards = $this->deckFactory->createDeck("card");
         $this->cards->autoreshuffle = false;     
 	}
-	
-    protected function getGameName() {
-		// Used for translations and stuff. Please do not modify.
-        return "lineit";
-    }	
 
     /*
         setupNewGame:
@@ -96,21 +93,17 @@ class LineIt extends Table {
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        $this->initStat('table', 'roundNumber', 0);
-        foreach(['table', 'player'] as $type) {
-            foreach([
-                "increasingLines", "decreasingLines",            
-                "marketToHand", "marketToLine", "playedCardFromHand",            
-                "closedLines", "closedLinesForced",                 
-                "betCardsPlayed", "betWon", "betLost",
-                "jackpotCollected",
-                "pointsFromJackpots",
-                "pointsFromLines",
-                "pointsFromBet",
-            ] as $name) {
-                $this->initStat($type, $name, 0);
-            }
-        }
+        $this->tableStats->init('roundNumber', 0);
+        $this->playerStats->init([
+            "increasingLines", "decreasingLines",            
+            "marketToHand", "marketToLine", "playedCardFromHand",            
+            "closedLines", "closedLinesForced",                 
+            "betCardsPlayed", "betWon", "betLost",
+            "jackpotCollected",
+            "pointsFromJackpots",
+            "pointsFromLines",
+            "pointsFromBet",
+        ], 0, updateTableStat: true);
 
         // setup the initial game situation here
         $this->setupCards();
@@ -119,10 +112,7 @@ class LineIt extends Table {
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
 
-        // TODO TEMP
-        //$this->debugSetup();
-
-        /************ End of the game initialization *****/
+        return \ST_NEW_ROUND;
     }
 
     /*
@@ -134,7 +124,7 @@ class LineIt extends Table {
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas() {
+    protected function getAllDatas(): array {
         $result = [];
     
         $currentPlayerId = intval(self::getCurrentPlayerId());    // !! We must only return informations visible by this player !!
@@ -222,7 +212,7 @@ class LineIt extends Table {
             return;
         }
 
-        throw new feException( "Zombie mode not supported at this game state: ".$statename );
+        throw new VisibleSystemException( "Zombie mode not supported at this game state: ".$statename );
     }
     
 ///////////////////////////////////////////////////////////////////////////////////:

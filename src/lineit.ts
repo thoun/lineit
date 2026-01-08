@@ -1,10 +1,3 @@
-declare const define;
-declare const ebg;
-declare const $;
-declare const dojo: Dojo;
-declare const _;
-declare const g_gamethemeurl;
-
 const ANIMATION_MS = 500;
 const ACTION_TIMER_DURATION = 5;
 
@@ -25,6 +18,8 @@ class LineIt implements LineItGame {
     
     private TOOLTIP_DELAY = document.body.classList.contains('touch-device') ? 1500 : undefined;
 
+    public bga: Bga;
+
     constructor() {
     }
     
@@ -43,6 +38,20 @@ class LineIt implements LineItGame {
 
     public setup(gamedatas: LineItGamedatas) {
         log( "Starting game setup" );
+        this.bga.gameArea.getElement().insertAdjacentHTML('beforeend', `
+            <div id="table">
+                <div id="tables-and-center">
+                    <div id="table-center">
+                        <div id="decks">
+                            <div id="deck" class="card-deck"><span id="deck-counter" class="deck-counter"></span></div>
+                        </div>
+                        <div id="market-title"></div>
+                        <div id="market"></div>
+                    </div>
+                    <div id="tables"></div>
+                </div>
+            </div>
+        `);
         
         this.gamedatas = gamedatas;
 
@@ -65,7 +74,6 @@ class LineIt implements LineItGame {
         });
 
         this.setupNotifications();
-        this.setupPreferences();
 
         log( "Ending game setup" );
     }
@@ -101,7 +109,7 @@ class LineIt implements LineItGame {
         if (args.mustClose) {
             this.setGamestateDescription(`Forced`);
         }
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             this.selectedCardId = null;
             this.tableCenter.setSelectable(true, args.canAddToHand ? null : args.canPlaceOnLine);
             this.getCurrentPlayerTable()?.setSelectable(true, args.canPlaceOnLine);
@@ -113,7 +121,7 @@ class LineIt implements LineItGame {
             this.setGamestateDescription(`OnlyClose`);
         }
         
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             this.getCurrentPlayerTable()?.setSelectable(true, args.canPlaceOnLine);
         }
     }
@@ -139,7 +147,7 @@ class LineIt implements LineItGame {
     //                        action status bar (ie: the HTML links in the status bar).
     //
     public onUpdateActionButtons(stateName: string, args: any) {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'chooseMarketCard':
                     this.selectedCardId = null;
@@ -202,28 +210,6 @@ class LineIt implements LineItGame {
 
     private getCurrentPlayerTable(): PlayerTable | null {
         return this.playersTables.find(playerTable => playerTable.playerId === this.getPlayerId());
-    }
-
-    private setupPreferences() {
-        // Extract the ID and value from the UI control
-        const onchange = (e) => {
-          var match = e.target.id.match(/^preference_[cf]ontrol_(\d+)$/);
-          if (!match) {
-            return;
-          }
-          var prefId = +match[1];
-          var prefValue = +e.target.value;
-          (this as any).prefs[prefId].value = prefValue;
-        }
-        
-        // Call onPreferenceChange() when any value changes
-        dojo.query(".preference_control").connect("onchange", onchange);
-        
-        // Call onPreferenceChange() now
-        dojo.forEach(
-          dojo.query("#ingame_menu_content .preference_control"),
-          el => onchange({ target: el })
-        );
     }
 
     private getOrderedPlayers(gamedatas: LineItGamedatas) {
@@ -341,7 +327,7 @@ class LineIt implements LineItGame {
     }
 
     private startActionTimer(buttonId: string, time: number): boolean {
-        if (Number((this as any).prefs[201]?.value) == 2) {
+        if (this.bga.userPreferences.get(201) == 2) {
             return false;
         }
 
@@ -440,8 +426,7 @@ class LineIt implements LineItGame {
 
     public takeAction(action: string, data?: any) {
         data = data || {};
-        data.lock = true;
-        (this as any).ajaxcall(`/lineit/lineit/${action}.html`, data, this, () => {});
+        this.bga.actions.performAction(action, data, { checkAction: false });
     }
 
     ///////////////////////////////////////////////////

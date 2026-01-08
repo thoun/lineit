@@ -1775,6 +1775,7 @@ var LineIt = /** @class */ (function () {
     */
     LineIt.prototype.setup = function (gamedatas) {
         log("Starting game setup");
+        this.bga.gameArea.getElement().insertAdjacentHTML('beforeend', "\n            <div id=\"table\">\n                <div id=\"tables-and-center\">\n                    <div id=\"table-center\">\n                        <div id=\"decks\">\n                            <div id=\"deck\" class=\"card-deck\"><span id=\"deck-counter\" class=\"deck-counter\"></span></div>\n                        </div>\n                        <div id=\"market-title\"></div>\n                        <div id=\"market\"></div>\n                    </div>\n                    <div id=\"tables\"></div>\n                </div>\n            </div>\n        ");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
         this.animationManager = new AnimationManager(this);
@@ -1791,7 +1792,6 @@ var LineIt = /** @class */ (function () {
             localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
         });
         this.setupNotifications();
-        this.setupPreferences();
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -1823,7 +1823,7 @@ var LineIt = /** @class */ (function () {
         if (args.mustClose) {
             this.setGamestateDescription("Forced");
         }
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             this.selectedCardId = null;
             this.tableCenter.setSelectable(true, args.canAddToHand ? null : args.canPlaceOnLine);
             (_a = this.getCurrentPlayerTable()) === null || _a === void 0 ? void 0 : _a.setSelectable(true, args.canPlaceOnLine);
@@ -1834,7 +1834,7 @@ var LineIt = /** @class */ (function () {
         if (args.onlyClose) {
             this.setGamestateDescription("OnlyClose");
         }
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             (_a = this.getCurrentPlayerTable()) === null || _a === void 0 ? void 0 : _a.setSelectable(true, args.canPlaceOnLine);
         }
     };
@@ -1859,7 +1859,7 @@ var LineIt = /** @class */ (function () {
     //
     LineIt.prototype.onUpdateActionButtons = function (stateName, args) {
         var _this = this;
-        if (this.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'chooseMarketCard':
                     this.selectedCardId = null;
@@ -1913,23 +1913,6 @@ var LineIt = /** @class */ (function () {
     LineIt.prototype.getCurrentPlayerTable = function () {
         var _this = this;
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === _this.getPlayerId(); });
-    };
-    LineIt.prototype.setupPreferences = function () {
-        var _this = this;
-        // Extract the ID and value from the UI control
-        var onchange = function (e) {
-            var match = e.target.id.match(/^preference_[cf]ontrol_(\d+)$/);
-            if (!match) {
-                return;
-            }
-            var prefId = +match[1];
-            var prefValue = +e.target.value;
-            _this.prefs[prefId].value = prefValue;
-        };
-        // Call onPreferenceChange() when any value changes
-        dojo.query(".preference_control").connect("onchange", onchange);
-        // Call onPreferenceChange() now
-        dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
     };
     LineIt.prototype.getOrderedPlayers = function (gamedatas) {
         var _this = this;
@@ -2016,8 +1999,7 @@ var LineIt = /** @class */ (function () {
         }
     };
     LineIt.prototype.startActionTimer = function (buttonId, time) {
-        var _a;
-        if (Number((_a = this.prefs[201]) === null || _a === void 0 ? void 0 : _a.value) == 2) {
+        if (this.bga.userPreferences.get(201) == 2) {
             return false;
         }
         var button = document.getElementById(buttonId);
@@ -2103,8 +2085,7 @@ var LineIt = /** @class */ (function () {
     };
     LineIt.prototype.takeAction = function (action, data) {
         data = data || {};
-        data.lock = true;
-        this.ajaxcall("/lineit/lineit/".concat(action, ".html"), data, this, function () { });
+        this.bga.actions.performAction(action, data, { checkAction: false });
     };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications

@@ -1,0 +1,151 @@
+{
+    "table": {
+        "increasingLines": {
+            "id": 15,
+            "name": "Increasing numbers lines",
+            "type": "int"
+        },
+        "decreasingLines": {
+            "id": 16,
+            "name": "Decreasing numbers lines",
+            "type": "int"
+        },
+        "marketToHand": {
+            "id": 20,
+            "name": "Market cards added to hand",
+            "type": "int"
+        },
+        "marketToLine": {
+            "id": 21,
+            "name": "Market cards added to line",
+            "type": "int"
+        },
+        "playedCardFromHand": {
+            "id": 22,
+            "name": "Cards played from hand",
+            "type": "int"
+        },
+        "closedLines": {
+            "id": 30,
+            "name": "Closed lines",
+            "type": "int"
+        },
+        "closedLinesForced": {
+            "id": 31,
+            "name": "Closed lines (forced)",
+            "type": "int"
+        },
+        "betCardsPlayed": {
+            "id": 40,
+            "name": "Bet cards played",
+            "type": "int"
+        },
+        "betWon": {
+            "id": 41,
+            "name": "Bet won",
+            "type": "int"
+        },
+        "betLost": {
+            "id": 42,
+            "name": "Bet lost",
+            "type": "int"
+        },
+        "jackpotCollected": {
+            "id": 50,
+            "name": "Jackpot collected",
+            "type": "int"
+        },
+        "pointsFromJackpots": {
+            "id": 60,
+            "name": "Points from jackpot cards",
+            "type": "int"
+        },
+        "pointsFromLines": {
+            "id": 61,
+            "name": "Points from scored line cards",
+            "type": "int"
+        },
+        "pointsFromBet": {
+            "id": 62,
+            "name": "Points from bets",
+            "type": "int"
+        },
+        "roundNumber": {
+            "id": 10,
+            "name": "Number of rounds",
+            "type": "int"
+        }
+    },
+    "player": {
+        "increasingLines": {
+            "id": 15,
+            "name": "Increasing numbers lines",
+            "type": "int"
+        },
+        "decreasingLines": {
+            "id": 16,
+            "name": "Decreasing numbers lines",
+            "type": "int"
+        },
+        "marketToHand": {
+            "id": 20,
+            "name": "Market cards added to hand",
+            "type": "int"
+        },
+        "marketToLine": {
+            "id": 21,
+            "name": "Market cards added to line",
+            "type": "int"
+        },
+        "playedCardFromHand": {
+            "id": 22,
+            "name": "Cards played from hand",
+            "type": "int"
+        },
+        "closedLines": {
+            "id": 30,
+            "name": "Closed lines",
+            "type": "int"
+        },
+        "closedLinesForced": {
+            "id": 31,
+            "name": "Closed lines (forced)",
+            "type": "int"
+        },
+        "betCardsPlayed": {
+            "id": 40,
+            "name": "Bet cards played",
+            "type": "int"
+        },
+        "betWon": {
+            "id": 41,
+            "name": "Bet won",
+            "type": "int"
+        },
+        "betLost": {
+            "id": 42,
+            "name": "Bet lost",
+            "type": "int"
+        },
+        "jackpotCollected": {
+            "id": 50,
+            "name": "Jackpot collected",
+            "type": "int"
+        },
+        "pointsFromJackpots": {
+            "id": 60,
+            "name": "Points from jackpot cards",
+            "type": "int"
+        },
+        "pointsFromLines": {
+            "id": 61,
+            "name": "Points from scored line cards",
+            "type": "int"
+        },
+        "pointsFromBet": {
+            "id": 62,
+            "name": "Points from bets",
+            "type": "int"
+        }
+    }
+}
