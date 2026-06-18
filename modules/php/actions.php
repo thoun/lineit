@@ -22,9 +22,9 @@ trait ActionTrait {
 
         $this->playCard($playerId, $id);
 
-        $stateName = $this->gamestate->state()['name'];
+        $stateName = $this->gamestate->getCurrentMainState()->name;
         if($stateName != 'playHandCard') {
-            self::DbQuery("update player set player_played_hand = 1 where player_id = $playerId");
+            $this->DbQuery("update player set player_played_hand = 1 where player_id = $playerId");
         }
 
         $this->incStat(1, 'playedCardFromHand');   
@@ -64,7 +64,7 @@ trait ActionTrait {
         $this->cards->moveCard($id, 'hand', $playerId);
         $card = $this->getCardById($id);
         
-        self::notifyAllPlayers('chooseMarketCardHand', clienttranslate('${player_name} adds card ${cardValue} to hand'), [
+        $this->notifyAllPlayers('chooseMarketCardHand', clienttranslate('${player_name} adds card ${cardValue} to hand'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'card' => $card,
@@ -84,7 +84,7 @@ trait ActionTrait {
         $playerId = intval($this->getActivePlayerId());
 
         $forced = false;
-        if ($this->gamestate->state()['name'] == 'chooseMarketCard') {
+        if ($this->gamestate->getCurrentMainState()->name == 'chooseMarketCard') {
             $args = $this->argChooseMarketCard();
             if ($args['mustClose']) {
                 $forced = true;
@@ -104,9 +104,9 @@ trait ActionTrait {
     public function pass() {
         $this->checkAction('pass');         
 
-        if($this->gamestate->state()['name'] == 'playHandCard') {
+        if($this->gamestate->getCurrentMainState()->name == 'playHandCard') {
             $playerId = intval($this->getActivePlayerId());
-            self::DbQuery("update player set player_played_hand = 1 where player_id = $playerId");
+            $this->DbQuery("update player set player_played_hand = 1 where player_id = $playerId");
         }
 
         $this->gamestate->nextState('next');

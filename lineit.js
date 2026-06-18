@@ -1965,8 +1965,7 @@ var LineIt = /** @class */ (function () {
         document.getElementById("bet-tokens-".concat(playerId)).insertAdjacentHTML('beforeend', "\n            <div class=\"bet-token\" data-value=\"".concat(value, "\" style=\"order: ").concat(value, "\"></div>\n        "));
     };
     LineIt.prototype.incScore = function (playerId, inc) {
-        var _a;
-        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.incValue(inc);
+        this.bga.playerPanels.getScoreCounter(playerId).incValue(inc);
     };
     LineIt.prototype.incScored = function (playerId, inc) {
         this.scoredCounters[playerId].incValue(inc);

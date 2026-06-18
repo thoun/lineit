@@ -288,7 +288,7 @@ class LineIt implements LineItGame {
     }
 
     private incScore(playerId: number, inc: number) {
-        (this as any).scoreCtrl[playerId]?.incValue(inc);
+        this.bga.playerPanels.getScoreCounter(playerId).incValue(inc);
     }
 
     private incScored(playerId: number, inc: number) {

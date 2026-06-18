@@ -50,12 +50,12 @@ trait UtilTrait {
         return count($this->getPlayersIds()) + 2;
     }
 
-    function getPlayerName(int $playerId) {
-        return self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id = $playerId");
+    function getPlayerName(int $playerId): string {
+        return $this->getPlayerNameById($playerId);
     }
 
-    function getPlayerScore(int $playerId) {
-        return intval($this->getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
+    function getPlayerScore(int $playerId): int {
+        return $this->bga->playerScore->get($playerId);
     }
 
     function getFirstPlayer() {
@@ -65,7 +65,7 @@ trait UtilTrait {
     function setFirstPlayer(int $playerId) {
         $this->setGameStateValue(FIRST_PLAYER, $playerId);
 
-        self::notifyAllPlayers('newFirstPlayer', '', [
+        $this->notifyAllPlayers('newFirstPlayer', '', [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
         ]);
@@ -159,7 +159,7 @@ trait UtilTrait {
 
         $this->cards->moveCard($id, 'line'.$playerId, intval($this->cards->countCardInLocation('line'.$playerId)));
 
-        self::notifyAllPlayers('playCard', clienttranslate('${player_name} adds card ${cardValue} to line'), [
+        $this->notifyAllPlayers('playCard', clienttranslate('${player_name} adds card ${cardValue} to line'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'card' => $card,
@@ -187,10 +187,10 @@ trait UtilTrait {
     function applyJackpot(int $playerId, int $color, array $lineColorCards) {
         $jackpotCardsCount = intval($this->cards->countCardInLocation('jackpot', $color));
         if ($jackpotCardsCount > 0) {
-            $this->cards->moveAllCardsInLocation('jackpot', 'scored', $color, $playerId);            
-            self::DbQuery("update player set player_score = player_score + $jackpotCardsCount where `player_id` = $playerId");
+            $this->cards->moveAllCardsInLocation('jackpot', 'scored', $color, $playerId);
+            $this->bga->playerScore->inc($playerId, $jackpotCardsCount, null);
         }
-        self::notifyAllPlayers($jackpotCardsCount > 0 ? 'applyJackpot' : 0, clienttranslate('${player_name} adds ${count} card(s) from the ${colorName} jackpot pile to scored cards'), [
+        $this->notifyAllPlayers($jackpotCardsCount > 0 ? 'applyJackpot' : 0, clienttranslate('${player_name} adds ${count} card(s) from the ${colorName} jackpot pile to scored cards'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'count' => $jackpotCardsCount,
@@ -206,7 +206,7 @@ trait UtilTrait {
     }
 
     function applyCloseLine(int $playerId) {
-        self::notifyAllPlayers('log', clienttranslate('${player_name} closes his line'), [
+        $this->notifyAllPlayers('log', clienttranslate('${player_name} closes his line'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
         ]);
@@ -224,7 +224,7 @@ trait UtilTrait {
             $tokens[$tokenNumber]++;
             $this->DbQuery("UPDATE player SET `player_tokens` = '".json_encode($tokens)."', player_score = player_score + $tokenNumber WHERE player_id = $playerId");
 
-            self::notifyAllPlayers('betResult', $betWon ? clienttranslate('${player_name} won the ${cardValue} bet') : clienttranslate('${player_name} lost the ${cardValue} bet'), [
+            $this->notifyAllPlayers('betResult', $betWon ? clienttranslate('${player_name} won the ${cardValue} bet') : clienttranslate('${player_name} lost the ${cardValue} bet'), [
                 'playerId' => $playerId,
                 'player_name' => $this->getPlayerName($playerId),
                 'value' => $tokenNumber,
@@ -251,10 +251,10 @@ trait UtilTrait {
 
         if (count($scoredCards) > 0) {
             $this->cards->moveCards(array_map(fn($card) => $card->id, $scoredCards), 'scored', $playerId);
-            self::DbQuery("update player set player_score = player_score + ".count($scoredCards)." where `player_id` = $playerId");
+            $this->bga->playerScore->inc($playerId, count($scoredCards), null);
         }
 
-        self::notifyAllPlayers('closeLine', clienttranslate('${player_name} adds ${count} card(s) from the line to scored cards (${removed} removed cards)'), [
+        $this->notifyAllPlayers('closeLine', clienttranslate('${player_name} adds ${count} card(s) from the line to scored cards (${removed} removed cards)'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'count' => count($scoredCards),

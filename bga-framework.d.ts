@@ -25,6 +25,8 @@ declare const g_replayFrom: number | undefined;
 
 /**
  * The URL to the root of the game files, for example to access dynamically to an image.
+ * 
+ * @deprecated use this.bga.images.getImgUrl()
  */
 declare const g_gamethemeurl: string;
 
@@ -59,6 +61,20 @@ declare function $(text: ElementOrId): HTMLElement;
  */
 declare function getLibUrl(name: string, version: string): string;
 
+/**
+ * Loads a versionned ESM lib.
+ * 
+ * Example of usage: `const BgaAnimations = await importEsmLib('bga-animations', '1.x');`
+ */
+declare function importEsmLib(name: string, version: string): Promise<any>;
+
+/**
+ * Loads Dojo (UMD) libs.
+ * 
+ * Example of usage: `const [Counter, Stock] = await importDojoLibs(["ebg/counter", "ebg/stock"]);`
+ */
+declare function importDojoLibs(names: string[]): Promise<any[]>;
+
 interface Gamestate {
     active_player?: string;
     args: any;
@@ -70,7 +86,7 @@ interface Gamestate {
     private_state?: Gamestate;
 }
 
-interface Gamedatas<P = Player> {
+interface Gamedatas<P extends Player = Player> {
   gamestate: Gamestate;
   gamestates: { [gamestateId: number]: Gamestate };
   playerorder: (string | number)[];
@@ -152,7 +168,7 @@ declare class StatusBar {
     disabled?: boolean;
     tooltip?: string;
     confirm?: string | (() => string | undefined | null); 
-    autoclick?: boolean;
+    autoclick?: boolean | { abortSignal?: AbortSignal, pausable?: boolean };
   }): HTMLButtonElement;
 
   /**
@@ -189,11 +205,21 @@ declare class Images {
    * @param {string[]} images the filenames
    */
   preloadImages(images: string[]): void;
+
+  /**
+   * Returns the img root url, or the image url if a file name is provided.
+   * 
+   * @param {string | undefined} filename 
+   * @returns string
+   */
+  getImgUrl(filename?: string): string;
 }
 
 declare class Sounds {
   /**
-   * Load a sound file to be used with play.
+   * Load a sound file (from img folder) to be used with play.
+   * 
+   * @deprecated move the sounds in the `sounds` folder to benefit from autoloading, then remove this call.
    * 
    * @param {string} id the id to be used by play
    * @param {string} fileName the file name, without extension (there should be a .ogg and a .mp3 with that file name in the img folder). If unset, it will try with the id as file name.
@@ -201,11 +227,25 @@ declare class Sounds {
   load(id: string, fileName: string): void;
 
   /**
-   * Play the sound with the given id.
+   * Play the sound with the given id (or filename without extension for preloaded sounds in the `sounds` folder).
    * 
    * @param {string} id the sound id
    */
   play(id: string): void;
+
+  /**
+   * Tell the interface to not preload specific sounds in your sound root directory.
+   * 
+   * @param {string[]} sounds the filenames (without extension)
+   */
+  dontPreloadSounds(sounds: string[]): void;
+
+  /**
+   * Tell the interface to preload specific sounds in your sound directory.
+   * 
+   * @param {string[]} sounds the filenames (without extension)
+   */
+  preloadSounds(sounds: string[]): void;
 }
 
 declare class UserPreferences {
@@ -220,9 +260,14 @@ declare class UserPreferences {
    * Method to programmatically change a game-specific user preference.
    */
   set(prefId: number, value: number): void;
+
+  /**
+   * Hide or show a game-specific user preference.
+   */
+  toggleVisibility(prefId: number, visible?: boolean): void;
 }
 
-declare class Players {
+declare class Players<P extends Player = Player> {
   /**
    * Return the id of the player who is looking at the game. The player may not be part of the game (i.e. spectator)
    * @returns {number} the current player id
@@ -230,12 +275,18 @@ declare class Players {
   getCurrentPlayerId(): number;
 
   /**
+   * Return the no of the player who is looking at the game. The player may not be part of the game (i.e. spectator)
+   * @returns {number | null} the current player no
+   */
+  getCurrentPlayerNo(): number | null;
+
+  /**
    * Return the current player data stored in gamedatas.players.
    * Can be undefined, if the player isn't at this table (spectator).
    * 
-   * @returns {Object | undefined} the player
+   * @returns {P | undefined} the player
    */
-  getCurrentPlayer(): Object | undefined;
+  getCurrentPlayer(): P | undefined;
 
   /**
    * Returns true if the player on whose browser the code is running is a spectator.
@@ -266,11 +317,22 @@ declare class Players {
   getActivePlayerId(): number | null;
 
   /**
+   * Return the no of the active player, or null if we are not in an ACTIVE_PLAYER type state.
+   * @returns {number | null} the active player no
+   */
+  getActivePlayerNo(): number | null;
+
+  /**
    * Return the active player, or null if we are not in an ACTIVE_PLAYER type state.
    * 
-   * @returns {Object | null} the active player
+   * @returns {P | null} the active player
    */
-  getActivePlayer(): Object | null;
+  getActivePlayer(): P | null;
+
+  /**
+   * @deprecated use getPlayerById.
+   */
+  getPlayer(playerId: number) : P | undefined;
 
   /**
    * Return the player data stored in gamedatas.players.
@@ -278,7 +340,15 @@ declare class Players {
    * 
    * @returns {Object | undefined} the player
    */
-  getPlayer(playerId: number) : Object | undefined;
+  getPlayerById(playerId: number) : P | undefined;
+
+  /**
+   * Return the player data stored in gamedatas.players.
+   * Can be undefined, if the player isn't at this table (spectator).
+   * 
+   * @returns {Object | undefined} the player
+   */
+  getPlayerByNo(playerNo: number) : P | undefined;
 
   /**
    * Return the HTML code for a player name, colored and with optional background.
@@ -297,6 +367,27 @@ declare class Players {
    * @returns {number[]} the active player ids
    */
   getActivePlayerIds(): number[];
+
+  /**
+   * Get the avatar url of a player.
+   * 
+   * @param {number} playerId the player id to get the avatar from (or 0 to get the default avatar)
+   * @param {32 | 50 | 92 | 184} size the size of the avatar, can be 32, 50, 92 or 184 (default)
+   * @returns the avatar url
+   */
+  getPlayerAvatarUrl(playerId: number, size?: number): string;
+
+  /**
+   * Return the no of the player, by id
+   * @returns {number | null} the player no, or null if the player id is not a player on this table
+   */
+  getPlayerNoById(playerId: number): number | null;
+
+  /**
+   * Return the id of the player, by no
+   * @returns {number} the player id
+   */
+  getPlayerIdByNo(playerNo: number): number;
 }
 
 declare class Actions {
@@ -403,6 +494,30 @@ declare class PlayerPanels {
    * @returns the div element for game specific content on player panels
    */
   getElement(playerId: number): HTMLDivElement;
+
+  /**
+   * Return the div on the player board where the dev can add counters and other game specific indicators.
+   *
+   * @param {number} playerNo the player no
+   * @returns the div element for game specific content on player panels
+   */
+  getElementByNo(playerNo: number): HTMLDivElement;
+
+  /**
+   * Return the score counter of a player.
+   *
+   * @param {number} playerId the player id
+   * @returns the score counter
+   */
+  getScoreCounter(playerId: number): Counter;
+
+  /**
+   * Return the score counter of a player.
+   *
+   * @param {number} playerNo the player no
+   * @returns the score counter
+   */
+  getScoreCounterByNo(playerNo: number): Counter;
 
   /**
    * Add a player panel for an automata.
@@ -530,13 +645,13 @@ declare class States {
     isOnClientState(): boolean;
 }
 
-interface Bga<G = Gamedatas> {
-  gameui: GameGui<G>;
+interface Bga<P extends Player = Player, G extends Gamedatas<P> = Gamedatas<P>> {
+  gameui: GameGui<P, G>;
   statusBar: StatusBar;
   images: Images;
   sounds: Sounds;
   userPreferences: UserPreferences;
-  players: Players;
+  players: Players<P>;
   actions: Actions;
   notifications: Notifications;
   gameArea: GameArea;
@@ -545,7 +660,7 @@ interface Bga<G = Gamedatas> {
   states: States;
 }
 
-declare class GameGui<G = Gamedatas> {
+declare class GameGui<P extends Player = Player, G extends Gamedatas<P> = Gamedatas<P>> {
   /**
    * Return true if the game is in realtime. Note that having a distinct behavior in realtime and turn-based should be exceptional.
    */
@@ -582,10 +697,12 @@ declare class GameGui<G = Gamedatas> {
 
   /**
    * The player panel score counters.
+   * 
+   * @deprecated use this.bga.playerPanels.getScoreCounter
    */
   scoreCtrl: {[player_id: number]: Counter};
 
-  bga: Bga;
+  bga: Bga<P, G>;
 
   statusBar: StatusBar;
   sounds: Sounds;
